@@ -1,2 +1,3 @@
-# cho-lamoreaux-a1 Assignment 1
-# Group member1: Sungjoo Cho
+# Assignment 1
+## Group Member 1: Sungjoo Cho
+## Group Member 2: Catherine (Kate) Lamoreaux
