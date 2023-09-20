@@ -1,0 +1,18 @@
+---
+title: "Assignment 2"
+author: "Sungjoo Cho, Catherine (Kate) Lamoreaux"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Packages
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+library(gtrendsR)
+library(censusapi)
+```
+
