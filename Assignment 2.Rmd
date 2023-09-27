@@ -93,7 +93,7 @@ Once you have an access key, store this key in the `cs_key` object. We will use 
 
 ```{r}
 #| eval: false
-cs_key <- "your key here" #From Kate: I have this but am not sure whether to post it here because our repo is public? What do you think?
+cs_key <- "your key here" #From Kate: save your key as a separate text file that you don't upload to git. You should use your individual keys, privately.
 ```
 
 In the following, we request basic socio-demographic information (population, median age, median household income, income per capita) for cities and villages in the state of Illinois.
