@@ -9,10 +9,79 @@ output: pdf_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-### Packages
+## Packages
 ```{r message=FALSE, warning=FALSE}
 library(tidyverse)
 library(gtrendsR)
 library(censusapi)
+library(gtrendsR)
+library(magrittr)
+
+if (!require(tidyverse)) install.packages("tidyverse")
+library(tidyverse)
+library(magrittr)
 ```
+
+## Pulling from APIs
+```{r}
+# pulling from APIs
+dat <- gtrends(c("crime", "loans"),
+               geo = "US-IL",
+               time = "2020-01-01 2020-12-31",
+               low_search_volume = TRUE)
+head(dat)
+plot(dat)
+
+# transforming the `data.frame` into a `tibble`.
+str(dat)
+dat_time <- as_tibble(dat$interest_over_time)
+glimpse(dat_time)
+
+head(table(dat_time$date))
+table(dat_time$keyword)
+table(dat_time$geo)
+```
+## Answer the following questions for the keywords “crime” and “loans”.
+
+### The mean, median and variance of the search hits for the keywords.
+```{r}
+# mean, median and variance of the search hits for the keywords
+stat_keywords <- dat_time %>%
+  group_by(keyword) %>%
+  summarize(mean = mean(hits),
+            median = median(hits),
+            variance = var(hits))
+
+stat_keywords
+knitr::kable(stat_keywords, caption = "Statistics of the search hits for the keywords")
+```
+
+### Which cities (locations) have the highest search frequency for loans? Note that there might be multiple rows for each city if there were hits for both “crime” and “loans” in that city. It might be easier to answer this question if we had the search hits info for both search terms in two separate variables. That is, each row would represent a unique city.
+
+Justice has the highest search frequency for loans.
+
+```{r}
+# using pivot_wider
+city <- dat$interest_by_city %>%
+  pivot_wider(names_from = keyword,
+              values_from = hits)
+
+# changing NA values to 0
+city['loans'][is.na(city['loans'])] <- 0
+
+# ordering
+city <- city[order(city$loans), ]
+city
+```
+
+### Is there a relationship between the search intensities between the two keywords we used?
+
+```{r}
+
+```
+
+
+
+
+
 
