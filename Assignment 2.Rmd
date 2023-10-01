@@ -76,6 +76,7 @@ city['loans'][is.na(city['loans'])] <- 0
 
 # ordering
 city <- city[order(city$loans), ]
+
 city
 ```
 
