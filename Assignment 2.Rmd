@@ -23,6 +23,7 @@ library(tidyverse)
 library(magrittr)
 
 library(censusapi)
+library(ggplot2)
 ```
 
 ## Pulling from APIs
@@ -96,9 +97,7 @@ plot(res)
 
 ### Repeat the above for keywords related to covid. Make sure you use multiple keywords like we did above. Try several different combinations and think carefully about words that might make sense within this context.
 
--   We tried several different combinations of keywords, including "trump", "death", "mask", and "virus." We found that "death" and "mask" were not searched nearly as frequently as "covid." "Virus" peaked early, during the onset of the U.S. lockdowns, but rapidly decreased, stabilizing around June 2020. In contrast, searches for "trump" remained high thorughout 2020
-
--   Current graph: covid, trump, death, mask, virus
+-   We tried several different combinations of keywords, including "trump", "death", "mask", and "virus." We found that "death" and "mask" were not searched nearly as frequently as "covid." "Virus" peaked early, during the onset of the U.S. lockdowns, but rapidly decreased, stabilizing around June 2020. In contrast, searches for "trump" remained high throughout 2020.
 
 ```{r}
 # pulling from APIs with keywords (covid, trump, death, mask, virus)
@@ -154,14 +153,21 @@ knitr::kable(stat_covid_keywords, caption = "Statistics of the search hits for t
     -   Wapella (100), Oak Lawn (99), Strasberg (90), and Glenview (90) have the highest searches for `covid`.
 
 ```{r}
+res_covid_city<- as_tibble(res_covid$interest_by_city)
+
+res_covid_city['hits'][is.na(res_covid_city['hits'])] <- 0
+
+res_covid_city[res_covid_city$location == "Windsor" & res_covid_city$hits ==63, "location"] <- "New Windsor"
+
 # using pivot_wider
-res_covid_city <- res_covid$interest_by_city %>%
-  pivot_wider(names_from = keyword,
-              values_from = hits)
+res_covid_city<- res_covid_city %>%
+ pivot_wider(names_from = keyword,
+            values_from = hits,
+            values_fill = 0)
 
 # changing NA values to 0 for loans
-res_covid_city['covid'][is.na(res_covid_city['covid'])] <- 0
-res_covid_city['trump'][is.na(res_covid_city['trump'])] <- 0
+#res_covid_city['covid'][is.na(res_covid_city['covid'])] <- 0
+#res_covid_city['trump'][is.na(res_covid_city['trump'])] <- 0
 
 # sorting
 res_covid_city <- res_covid_city[order(-res_covid_city$covid), ]
@@ -234,9 +240,11 @@ acs_il <-
 It seems like we could try to use this location information listed above to merge this data set with the Google Trends data. However, we first have to clean `NAME` so that it has the same structure as `location` in the search interest by city data. Add a new variable `location` to the ACS data that only includes city names.
 
 ```{r}
-#Clean NAME in ACS data
-
-#Add location variable to ACS name with city names
+# Cleaning NAME in ACS data by adding location variable to ACS
+acs_il$location <-  gsub(", .*", "",acs_il$NAME)
+acs_il$location<- gsub("(city|village|CDP|town)", "", acs_il$location)
+acs_il$location<-trimws(acs_il$location, "right")
+head(acs_il)
 ```
 
 Answer the following questions with the "crime" and "loans" Google trends data and the ACS data.
@@ -244,21 +252,40 @@ Answer the following questions with the "crime" and "loans" Google trends data a
 -   First, check how many cities don't appear in both data sets, i.e. cannot be matched. Then, create a new data set by joining the Google Trends and the ACS data. Keep only cities that appear in both data sets.
 
     ```{r}
-    #compare datasets to one other
+    # Are any of the locations in our search data also in our ACS data?
+    any(res_city$location %in% acs_il$location)
 
+    # Printing how many search data cities are in the ACS data
+    summary(res_city$location %in% acs_il$location)
+
+    # Doing an inner join, only keeping variables common to both datasets
+    res_city_acs <- inner_join(res_city, acs_il, by = join_by("location" == "location"))
 
     ```
 
 -   Compute the mean of the search popularity for both keywords for cities that have an above average median household income and for those that have an below average median household income. When building your pipe, start with creating the grouping variable and then proceed with the remaining tasks. What conclusions might you draw from this?
 
     ```{r}
+    popsearchmean <- res_city_acs%>% 
+      mutate(high_hh_income = ifelse(hh_income > median(hh_income), 1,0)) %>%
+      group_by(high_hh_income) %>%
+      summarize(mean_pop_crime = mean(crime),
+                mean_pop_loans = mean(loans))
 
+    knitr::kable(popsearchmean, caption = "Popularity of Crime and Loans Searches Across Low and High-income Illinois Cities")
     ```
 
 -   Is there a relationship between the median household income and the search popularity of the Google trends terms? Describe the relationship and use a scatterplot with `qplot()`.
 
     ```{r}
-
+    res_city_acs %>%
+      qplot(x = hh_income, y = crime, data = ., 
+            geom = "auto")
+    res_city_acs %>%
+      qplot(x = hh_income, y = loans, data = ., 
+            geom = "auto")
+    ggplot(res_city_acs, aes(crime, loans, colour = hh_income)) + 
+      geom_point()
     ```
 
 Repeat the above steps using the covid data and the ACS data.
@@ -266,19 +293,48 @@ Repeat the above steps using the covid data and the ACS data.
 -   First, check how many cities don't appear in both data sets, i.e. cannot be matched. Then, create a new data set by joining the Google Trends and the ACS data. Keep only cities that appear in both data sets.
 
     ```{r}
+    # Are any of the locations in our search data also in our ACS data?
+    any(res_covid_city$location %in% acs_il$location)
 
+    # Printing how many search data cities are in the ACS data
+    summary(res_covid_city$location %in% acs_il$location)
+
+    # Doing an inner join, only keeping variables common to both datasets
+    res_covid_city_acs <- inner_join(res_covid_city, acs_il, by = join_by("location" == "location"))
     ```
 
 -   Compute the mean of the search popularity for both keywords for cities that have an above average median household income and for those that have an below average median household income. When building your pipe, start with creating the grouping variable and then proceed with the remaining tasks. What conclusions might you draw from this?
 
     ```{r}
+    popsearchmean_covid <- res_covid_city_acs%>% 
+      mutate(high_hh_income = ifelse(hh_income > median(hh_income), 1,0)) %>%
+      group_by(high_hh_income) %>%
+      summarize(mean_pop_covid = mean(covid),
+                mean_pop_trump = mean(trump))
 
+    knitr::kable(popsearchmean_covid, caption = "Popularity of COVID and Trump Searches Across Low and High-income Illinois Cities")
     ```
 
 -   Is there a relationship between the median household income and the search popularity of the Google trends terms? Describe the relationship and use a scatterplot with `qplot()`.
 
     ```{r}
+    # Running correlations of each
+    cor(res_covid_city_acs$hh_income,res_covid_city_acs$covid)
+    cor(res_covid_city_acs$hh_income,res_covid_city_acs$trump)
+    # Doing qolots of each
+    res_covid_city_acs %>%
+      qplot(x = hh_income, y = covid, data = ., 
+            geom = "auto")
+    res_covid_city_acs %>%
+      qplot(x = hh_income, y = trump, data = ., 
+            geom = "auto")
+    # Doing a regular scatterplot in base R
+    plot(res_covid_city_acs$hh_income,res_covid_city_acs$covid)
+    plot(res_covid_city_acs$hh_income,res_covid_city_acs$trump)
 
+    # Using ggplot
+    ggplot(res_covid_city_acs, aes(covid, trump, colour = hh_income)) + 
+      geom_point()
     ```
 
     > > > > > > > b192c6cd3d9542ee1a18b0e7d4f8984f8769b518
