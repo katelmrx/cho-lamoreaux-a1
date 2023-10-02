@@ -210,10 +210,10 @@ Now, it might be useful to rename the socio-demographic variables (`B01001_001E`
 #| eval: false
 acs_il <-
   acs_il %>%
-  rename(pop = B01001_001E, 
-         age = B06002_001E, 
-         hh_income = B19013_001E, 
-         income = B19301_001E)
+  rename(pop = 'B01001_001E', 
+         age = 'B06002_001E', 
+         hh_income = 'B19013_001E', 
+         income = 'B19301_001E')
 ```
 
 It seems like we could try to use this location information listed above to merge this data set with the Google Trends data. However, we first have to clean `NAME` so that it has the same structure as `location` in the search interest by city data. Add a new variable `location` to the ACS data that only includes city names.
@@ -222,15 +222,44 @@ Answer the following questions with the "crime" and "loans" Google trends data a
 
 -   First, check how many cities don't appear in both data sets, i.e. cannot be matched. Then, create a new data set by joining the Google Trends and the ACS data. Keep only cities that appear in both data sets.
 
-    ```{r}
+```{r}
+# creating a new variable 'location' that only includes city names
+no_illinois <- gsub(", Illinois", '', acs_il$NAME)
+no_village <- gsub(" village", '', no_illinois)
+no_city <- gsub(" city", '', no_village)
+no_cdp <- gsub(" CDP", '', no_city)
+acs_with_location <- acs_il %>%
+  mutate(location = no_cdp)
+head(acs_with_location)
 
-    ```
+# the number of observations
+nrow(acs_with_location)
+nrow(res_city)
+```
 
 -   Compute the mean of the search popularity for both keywords for cities that have an above average median household income and for those that have an below average median household income. When building your pipe, start with creating the grouping variable and then proceed with the remaining tasks. What conclusions might you draw from this?
 
-    ```{r}
+```{r}
+# finding out missing values in the household income variable
+merge_acs_gtrend$hh_income
 
-    ```
+# removing NA values
+merge_acs_gtrend <- merge_acs_gtrend %>%
+  drop_na(hh_income)
+
+# creating the grouping variable
+merge_acs_gtrend <- merge_acs_gtrend %>%
+  mutate(income_group = ifelse(hh_income>median(hh_income), 'Above', 'Below'))
+head(merge_acs_gtrend)
+
+# compute the mean of the search popularity for both keywords by income group
+mean_income_keywords <- merge_acs_gtrend %>%
+  group_by(income_group) %>%
+  summarise(mean_crime = mean(crime),
+            mean_loans = mean(loans))
+
+kable(mean_income_keywords, caption = "The Mean of the Search Popularity for Both Keywords by Income Groups")
+```
 
 -   Is there a relationship between the median household income and the search popularity of the Google trends terms? Describe the relationship and use a scatterplot with `qplot()`.
 
