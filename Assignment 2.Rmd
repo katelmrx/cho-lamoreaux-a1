@@ -9,10 +9,7 @@ output: pdf_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-<<<<<<< HEAD
 ## Packages
-=======
-### Packages
 
 ```{r message=FALSE, warning=FALSE}
 library(tidyverse)
@@ -24,34 +21,38 @@ library(magrittr)
 if (!require(tidyverse)) install.packages("tidyverse")
 library(tidyverse)
 library(magrittr)
+
+library(censusapi)
 ```
 
 ## Pulling from APIs
-<<<<<<< HEAD
+
 ```{r}
 # pulling from APIs
-dat <- gtrends(c("crime", "loans"),
+res <- gtrends(c("crime", "loans"),
                geo = "US-IL",
                time = "2020-01-01 2020-12-31",
                low_search_volume = TRUE)
-head(dat)
-plot(dat)
+head(res)
+plot(res)
 
-# transforming the `data.frame` into a `tibble`.
-str(dat)
-dat_time <- as_tibble(dat$interest_over_time)
-glimpse(dat_time)
+# transforming the `data.frame` into a `tibble`
+str(res)
+res_time <- as_tibble(res$interest_over_time)
 
-head(table(dat_time$date))
-table(dat_time$keyword)
-table(dat_time$geo)
+glimpse(res_time)
+head(table(res_time$date))
+table(res_time$keyword)
+table(res_time$geo)
 ```
-## Answer the following questions for the keywords “crime” and “loans”.
 
-### The mean, median and variance of the search hits for the keywords.
+### Answer the following questions for the keywords "crime" and "loans".
+
+-   Find the mean, median and variance of the search hits for the keywords.
+
 ```{r}
 # mean, median and variance of the search hits for the keywords
-stat_keywords <- dat_time %>%
+stat_keywords <- res_time %>%
   group_by(keyword) %>%
   summarize(mean = mean(hits),
             median = median(hits),
@@ -61,95 +62,102 @@ stat_keywords
 knitr::kable(stat_keywords, caption = "Statistics of the search hits for the keywords")
 ```
 
-### Which cities (locations) have the highest search frequency for loans? Note that there might be multiple rows for each city if there were hits for both “crime” and “loans” in that city. It might be easier to answer this question if we had the search hits info for both search terms in two separate variables. That is, each row would represent a unique city.
+-   Which cities (locations) have the highest search frequency for loans? Note that there might be multiple rows for each city if there were hits for both "crime" and "loans" in that city. It might be easier to answer this question if we had the search hits info for both search terms in two separate variables. That is, each row would represent a unique city.
 
 Justice has the highest search frequency for loans.
 
 ```{r}
 # using pivot_wider
-city <- dat$interest_by_city %>%
+res_city <- res$interest_by_city %>%
   pivot_wider(names_from = keyword,
               values_from = hits)
 
-# changing NA values to 0
-city['loans'][is.na(city['loans'])] <- 0
+# changing NA values to 0 for loans
+res_city['loans'][is.na(res_city['loans'])] <- 0
 
-# ordering
-city <- city[order(city$loans), ]
-
-city
+# sorting
+res_city <- res_city[order(-res_city$loans), ]
+head(res_city)
 ```
-
-### Is there a relationship between the search intensities between the two keywords we used?
-
-```{r}
-
-```
-
-
-
-
-
-
-=======
-
-Our first data source is the Google Trends API. Suppose we are interested in the search trends for `crime` and `loans` in Illinois in the year 2020. We could find this using the following code:
-
-```{r}
-res <- gtrends(c("crime", "loans"), 
-               geo = "US-IL", 
-               time = "2020-01-01 2020-12-31", 
-               low_search_volume = TRUE)
-plot(res)
-```
-
-Answer the following questions for the keywords "crime" and "loans".
-
--   Find the mean, median and variance of the search hits for the keywords.
-
-    ```{r}
-
-    ```
-
--   Which cities (locations) have the highest search frequency for `loans`? Note that there might be multiple rows for each city if there were hits for both "crime" and "loans" in that city. It might be easier to answer this question if we had the search hits info for both search terms in two separate variables. That is, each row would represent a unique city.
-
-    ```{r}
-
-    ```
 
 -   Is there a relationship between the search intensities between the two keywords we used?
 
-    ```{r}
+The correlation between the search intensities of the two keywords is -0.1433. From the plot below shows the number of search hits (crime and loans) changes over time.
 
-    ```
+```{r}
+# changing NA values to 0 for loans
+res_city['crime'][is.na(res_city['crime'])] <- 0
 
-Repeat the above for keywords related to covid. Make sure you use multiple keywords like we did above. Try several different combinations and think carefully about words that might make sense within this context.
+# correlation
+cor(res_city$crime, res_city$loans)
 
--   Potential keywords to test: fauci, trump, bleach, ivermectin, lockdown, lockdowns, pandemic, china, deaths, death, new york city, nyc, doctor, doctors, nurse, nurses, hospitals, hospitals full, virus, coronavirus, mask
+# plot of the number of search hits changes over time
+plot(res)
+```
+
+### Repeat the above for keywords related to covid. Make sure you use multiple keywords like we did above. Try several different combinations and think carefully about words that might make sense within this context.
+
+-   Potential keywords to test: fauci, trump, bleach, ivermectin, lockdown, lockdowns, pandemic, china, deaths, death, new york city, nyc, doctor, doctors, nurse, nurses, hospitals, hospitals full, virus, coronavirus, mask, vaccine, mask, travel
 
 -   Current graph: covid, trump, death, mask, virus
 
 ```{r}
-results_covid <- gtrends(c("covid", "trump", "death", "mask", "virus"), #can specify up to 5 keyowrds at once
+# pulling from APIs with keywords (covid, trump, death, mask, virus)
+res_covid <- gtrends(c("covid", "trump", "death", "mask", "virus"),
                geo = "US-IL", 
-               time = "2020-01-01 2020-12-31", 
+               time = "2020-02-01 2021-03-01", 
                low_search_volume = TRUE)
-plot(results_covid)
+head(res_covid)
+plot(res_covid)
+str(res_covid)
+
+# transforming the `data.frame` into a `tibble`
+res_covid_time <- as_tibble(res_covid$interest_over_time)
+head(res_covid_time)
+
+# changing '<1' values to 0 for hits values
+res_covid_time$hits <- ifelse(res_covid_time$hits == '<1', 0, res_covid_time$hits)    
+res_covid_time$hits <- as.integer(res_covid_time$hits)
+str(res_covid_time)
+
+glimpse(res_covid_time)
+head(table(res_covid_time$date))
+table(res_covid_time$keyword)
+table(res_covid_time$geo)
 ```
 
 Answer the following questions for the keywords "covid" and "[ENTER CHOSEN KEYWORD HERE".
 
 -   Find the mean, median and variance of the search hits for the keywords.
 
-    ```{r}
+```{r}
+# mean, median and variance of the search hits for the keywords
+stat_covid_keywords <- res_covid_time %>%
+  group_by(keyword) %>%
+  summarize(mean = mean(hits),
+            median = median(hits),
+            variance = var(hits))
 
-    ```
+knitr::kable(stat_covid_keywords, caption = "Statistics of the search hits for the keywords")
+```
 
--   Which cities (locations) have the highest search frequency for `covid`? (Note that there might be multiple rows for each city if there were hits for both "crime" and "loans" in that city. It might be easier to answer this question if we had the search hits info for both search terms in two separate variables. That is, each row would represent a unique city. \*From Kate: we may not need this text? Adapted it from above.)
+-   Which cities (locations) have the highest search frequency for `covid`? (Note that there might be multiple rows for each city if there were hits for keywords in that city. It might be easier to answer this question if we had the search hits info for both search terms in two separate variables. That is, each row would represent a unique city. \*From Kate: we may not need this text? Adapted it from above.)
 
-    ```{r}
+* From Sungjoo: Getting errors/warning for some reasons,,?
 
-    ```
+```{r}
+# using pivot_wider
+res_covid_city <- res_covid$interest_by_city %>%
+  pivot_wider(names_from = keyword,
+              values_from = hits)
+
+# changing NA values to 0 for loans
+res_covid_city['covid'][is.na(res_covid_city['covid'])] <- 0
+
+# sorting
+res_city <- res_city[order(-res_city$loans), ]
+head(res_city)
+```
 
 -   Is there a relationship between the search intensities between the two keywords we used?
 
@@ -249,4 +257,5 @@ Repeat the above steps using the covid data and the ACS data.
     ```{r}
 
     ```
->>>>>>> b192c6cd3d9542ee1a18b0e7d4f8984f8769b518
+
+    > > > > > > > b192c6cd3d9542ee1a18b0e7d4f8984f8769b518
