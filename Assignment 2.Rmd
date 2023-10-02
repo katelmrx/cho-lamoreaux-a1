@@ -64,7 +64,7 @@ knitr::kable(stat_keywords, caption = "Statistics of the search hits for the key
 
 -   Which cities (locations) have the highest search frequency for loans? Note that there might be multiple rows for each city if there were hits for both "crime" and "loans" in that city. It might be easier to answer this question if we had the search hits info for both search terms in two separate variables. That is, each row would represent a unique city.
 
-Justice has the highest search frequency for loans.
+Union has the highest search frequency for loans.
 
 ```{r}
 # using pivot_wider
@@ -72,8 +72,9 @@ res_city <- res$interest_by_city %>%
   pivot_wider(names_from = keyword,
               values_from = hits)
 
-# changing NA values to 0 for loans
+# changing NA values to 0 for loans and crime
 res_city['loans'][is.na(res_city['loans'])] <- 0
+res_city['crime'][is.na(res_city['crime'])] <- 0
 
 # sorting
 res_city <- res_city[order(-res_city$loans), ]
@@ -82,13 +83,11 @@ head(res_city)
 
 -   Is there a relationship between the search intensities between the two keywords we used?
 
-The correlation between the search intensities of the two keywords is -0.1433. From the plot below shows the number of search hits (crime and loans) changes over time.
+The correlation between the search intensities of the two keywords is -0.1313. From the plot below shows the number of search hits (crime and loans) changes over time.
 
 ```{r}
-# changing NA values to 0 for loans
-res_city['crime'][is.na(res_city['crime'])] <- 0
-
 # correlation
+#  From Kate: Unsure if this number changes each day we run this. Earlier corr in text was -0.1433. I updated it to what I got: -0.1313.
 cor(res_city$crime, res_city$loans)
 
 # plot of the number of search hits changes over time
@@ -97,13 +96,22 @@ plot(res)
 
 ### Repeat the above for keywords related to covid. Make sure you use multiple keywords like we did above. Try several different combinations and think carefully about words that might make sense within this context.
 
--   Potential keywords to test: fauci, trump, bleach, ivermectin, lockdown, lockdowns, pandemic, china, deaths, death, new york city, nyc, doctor, doctors, nurse, nurses, hospitals, hospitals full, virus, coronavirus, mask, vaccine, mask, travel
+-   We tried several different combinations of keywords, including "trump", "death", "mask", and "virus." We found that "death" and "mask" were not searched nearly as frequently as "covid." "Virus" peaked early, during the onset of the U.S. lockdowns, but rapidly decreased, stabilizing around June 2020. In contrast, searches for "trump" remained high thorughout 2020
 
 -   Current graph: covid, trump, death, mask, virus
 
 ```{r}
 # pulling from APIs with keywords (covid, trump, death, mask, virus)
-res_covid <- gtrends(c("covid", "trump", "death", "mask", "virus"),
+#res_covid <- gtrends(c("covid", "trump", "death", "mask", "virus"),
+              # geo = "US-IL", 
+              # time = "2020-02-01 2021-03-01", 
+              # low_search_volume = TRUE)
+#head(res_covid)
+#plot(res_covid)
+#str(res_covid)
+
+#Commenting out code above to see if multiple keywords break the code.
+res_covid <- gtrends(c("covid", "trump"),
                geo = "US-IL", 
                time = "2020-02-01 2021-03-01", 
                low_search_volume = TRUE)
@@ -126,7 +134,7 @@ table(res_covid_time$keyword)
 table(res_covid_time$geo)
 ```
 
-Answer the following questions for the keywords "covid" and "[ENTER CHOSEN KEYWORD HERE".
+Answer the following questions for the keywords "covid" and "trump".
 
 -   Find the mean, median and variance of the search hits for the keywords.
 
@@ -141,9 +149,9 @@ stat_covid_keywords <- res_covid_time %>%
 knitr::kable(stat_covid_keywords, caption = "Statistics of the search hits for the keywords")
 ```
 
--   Which cities (locations) have the highest search frequency for `covid`? (Note that there might be multiple rows for each city if there were hits for keywords in that city. It might be easier to answer this question if we had the search hits info for both search terms in two separate variables. That is, each row would represent a unique city. \*From Kate: we may not need this text? Adapted it from above.)
+-   Which cities (locations) have the highest search frequency for `covid`? (Note that there might be multiple rows for each city if there were hits for keywords in that city. It might be easier to answer this question if we had the search hits info for both search terms in two separate variables. That is, each row would represent a unique city.
 
-* From Sungjoo: Getting errors/warning for some reasons,,?
+    -   Wapella (100), Oak Lawn (99), Strasberg (90), and Glenview (90) have the highest searches for `covid`.
 
 ```{r}
 # using pivot_wider
@@ -153,16 +161,23 @@ res_covid_city <- res_covid$interest_by_city %>%
 
 # changing NA values to 0 for loans
 res_covid_city['covid'][is.na(res_covid_city['covid'])] <- 0
+res_covid_city['trump'][is.na(res_covid_city['trump'])] <- 0
 
 # sorting
-res_city <- res_city[order(-res_city$loans), ]
-head(res_city)
+res_covid_city <- res_covid_city[order(-res_covid_city$covid), ]
+head(res_covid_city)
 ```
 
 -   Is there a relationship between the search intensities between the two keywords we used?
 
     ```{r}
+    # correlation
+    #  From Kate:This number appears to change each day we run this.
+    cor(res_covid_city$covid, res_covid_city$trump)
 
+    # plot of the number of search hits changes over time
+    plot(res_covid)
+    qplot(res_covid_city$covid, res_covid_city$trump)
     ```
 
 ## Google Trends + ACS
@@ -218,11 +233,19 @@ acs_il <-
 
 It seems like we could try to use this location information listed above to merge this data set with the Google Trends data. However, we first have to clean `NAME` so that it has the same structure as `location` in the search interest by city data. Add a new variable `location` to the ACS data that only includes city names.
 
+```{r}
+#Clean NAME in ACS data
+
+#Add location variable to ACS name with city names
+```
+
 Answer the following questions with the "crime" and "loans" Google trends data and the ACS data.
 
 -   First, check how many cities don't appear in both data sets, i.e. cannot be matched. Then, create a new data set by joining the Google Trends and the ACS data. Keep only cities that appear in both data sets.
 
     ```{r}
+    #compare datasets to one other
+
 
     ```
 
