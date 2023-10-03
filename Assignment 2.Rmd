@@ -2,7 +2,10 @@
 title: "Assignment 2"
 author: "Sungjoo Cho, Catherine (Kate) Lamoreaux"
 date: "`r Sys.Date()`"
-output: pdf_document
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
 ---
 
 ```{r setup, include=FALSE}
@@ -15,38 +18,26 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(gtrendsR)
 library(censusapi)
-library(gtrendsR)
 library(magrittr)
-
-if (!require(tidyverse)) install.packages("tidyverse")
-library(tidyverse)
-library(magrittr)
-
-library(censusapi)
 library(ggplot2)
 library(base)
+library(dplyr)
 ```
 
 ## Pulling from APIs
 
 ```{r}
-set.seed(123)
-
 # pulling from APIs
 res <- gtrends(c("crime", "loans"),
                geo = "US-IL",
                time = "2020-01-01 2020-12-31",
                low_search_volume = TRUE)
-plot(res)
 
 # transforming the `data.frame` into a `tibble`
 str(res)
 res_time <- as_tibble(res$interest_over_time)
 
 glimpse(res_time)
-head(table(res_time$date))
-table(res_time$keyword)
-table(res_time$geo)
 ```
 
 ### Answer the following questions for the keywords "crime" and "loans".
@@ -64,12 +55,13 @@ stat_keywords <- res_time %>%
             variance = var(hits))
 
 stat_keywords
-knitr::kable(stat_keywords, caption = "Statistics of the search hits for the keywords")
+knitr::kable(stat_keywords, caption = 
+               "Search-hits Statistics: 'crime' and 'loans'")
 ```
 
 -   Which cities (locations) have the highest search frequency for loans? Note that there might be multiple rows for each city if there were hits for both "crime" and "loans" in that city. It might be easier to answer this question if we had the search hits info for both search terms in two separate variables. That is, each row would represent a unique city.
 
-    -   Long Lake has the highest search frequency for loans.
+    -   Table 2 below shows the top six Illinois cities with the highest search frequency for `loans`.
 
 ```{r}
 # using pivot_wider
@@ -83,12 +75,15 @@ res_city['crime'][is.na(res_city['crime'])] <- 0
 
 # sorting
 res_city <- res_city[order(-res_city$loans), ]
-head(res_city)
+
+knitr::kable(head(res_city), caption = 
+               "IL Cities with the Highest Search Frequency for Loans")
 ```
 
 -   Is there a relationship between the search intensities between the two keywords we used?
 
-    -   The correlation between the search intensities of the two keywords is -0.2, indicating a negative correlation. This means that as the search intensity for 'crime' increases, the search intensity for 'loans' tends to decline. From the plot below illustrates this relationship, showing how the number of search hits for these keywords changes over time.
+    -   The correlation between the search intensities of the two keywords is low and negative. This means that there is not a strong linear relationship between searches for 'crime' and 'loans' over time, but generally, as the search intensity for 'loans' increases, the search intensity for 'crime' tends to decline.
+    -   The plot below illustrates this inverse relationship, but with more complexity. There are points in the year 2020 where the search teams appear to be inversely related, but there are other points of the year where the trendlines intersect (late May and September) or appear to run parallel to one another (after October). This change in this relationship between keywords over time suggests exogenous variables influencing the nature of these trends.
 
 ```{r}
 # correlation
@@ -100,10 +95,9 @@ plot(res)
 
 ### Repeat the above for keywords related to covid. Make sure you use multiple keywords like we did above. Try several different combinations and think carefully about words that might make sense within this context.
 
--   We tried several different combinations of keywords, including "trump", "death", "mask", and "virus." We found that "death" and "mask" were not searched nearly as frequently as "covid." "Virus" peaked early, during the onset of the U.S. lockdowns, but rapidly decreased, stabilizing around June 2020. In contrast, searches for "trump" remained high throughout 2020.
+-   We tried several different combinations of keywords, including "trump", "death", "mask", and "virus." We found that "death" and "mask" were not searched nearly as frequently as "covid." "Virus" searches peaked early, during the onset of the U.S. lockdowns, but rapidly decreased, stabilizing around June 2020. In contrast, searches for "trump" remained high throughout 2020.
 
 ```{r}
-set.seed(123)
 
 #Commenting out code above to see if multiple keywords break the code.
 res_covid <- gtrends(c("covid", "trump"),
@@ -118,21 +112,17 @@ res_covid_time <- as_tibble(res_covid$interest_over_time)
 head(res_covid_time)
 
 # changing '<1' values to 0 for hits values
-res_covid_time$hits <- ifelse(res_covid_time$hits == '<1', 0, res_covid_time$hits)    
+res_covid_time$hits <- ifelse(res_covid_time$hits == '<1', 0, 
+                              res_covid_time$hits)    
 res_covid_time$hits <- as.integer(res_covid_time$hits)
 str(res_covid_time)
-
-glimpse(res_covid_time)
-head(table(res_covid_time$date))
-table(res_covid_time$keyword)
-table(res_covid_time$geo)
 ```
 
 Answer the following questions for the keywords "covid" and "trump".
 
 -   Find the mean, median and variance of the search hits for the keywords.
 
-    -   The Table 2 below shows the mean, median, and variance of the search hits for the keywords 'covid' and 'trump'.
+    -   The Table 3 below shows the mean, median, and variance of the search hits for the keywords "covid" and "trump".
 
 ```{r}
 # mean, median and variance of the search hits for the keywords
@@ -147,7 +137,7 @@ knitr::kable(stat_covid_keywords, caption = "Statistics of the search hits for t
 
 -   Which cities (locations) have the highest search frequency for `covid`? (Note that there might be multiple rows for each city if there were hits for keywords in that city. It might be easier to answer this question if we had the search hits info for both search terms in two separate variables. That is, each row would represent a unique city.
 
-    -   Oak Lawn (100) has the highest searches for `covid`.
+    -   Table 4 below shows the top six Illinois cities with the highest search frequency for `covid`.
 
 ```{r}
 res_covid_city<- as_tibble(res_covid$interest_by_city)
@@ -155,27 +145,27 @@ res_covid_city<- as_tibble(res_covid$interest_by_city)
 # changing NA values to 0 for hits
 res_covid_city['hits'][is.na(res_covid_city['hits'])] <- 0
 
-####### From Sungjoo: Can you explain this code?
+# We found in running this analysis that Google Trends often gave us two cities
+# named Windsor for covid searches. Illinois has two cities called Windsor, 
+# with the larger of these also known as New Windsor. Based on the higher number of searches, we renamed the Windsor with the higher number of hits New Windsor.
 res_covid_city[res_covid_city$location == "Windsor" & res_covid_city$hits ==63, "location"] <- "New Windsor" 
 
-# using pivot_wider
+# using pivot_wider and changing NA values to 0
 res_covid_city<- res_covid_city %>%
  pivot_wider(names_from = keyword,
             values_from = hits,
             values_fill = 0)
 
-# changing NA values to 0 for loans
-#res_covid_city['covid'][is.na(res_covid_city['covid'])] <- 0
-#res_covid_city['trump'][is.na(res_covid_city['trump'])] <- 0
-
 # sorting
 res_covid_city <- res_covid_city[order(-res_covid_city$covid), ]
-head(res_covid_city)
+
+knitr::kable(head(res_covid_city), caption = "IL Cities with the Highest Search Frequency for Covid")
 ```
 
 -   Is there a relationship between the search intensities between the two keywords we used?
 
-    -   The correlation between the search intensities of the two keywords is -0.46, indicating a negative correlation. This means that as the search intensity for 'covid' rises, the search intensity for 'trump' tends to decrease. The plot below shows the change in the number of search hits for these two keywords over time. (Need to explain more,,?)
+    -   The correlation between the search intensities of the two keywords is negative and of moderate strength. This means that generally, as the search frequency for 'covid' increases, the search frequency for 'trump' decreases.
+    -   Like the plot of crime and loans searches, the plot below demonstrates a less striaghtforward and more complex relationship between the two searches, suggesting external factors influence both trends. There are times in 2020 when the search trends inversely mirror one another (April, July-August, November-December), times when they intersect (October-November), and times when they appear to be following the same course (September).
 
 ```{r}
 # correlation
@@ -183,7 +173,6 @@ cor(res_covid_city$covid, res_covid_city$trump)
 
 # plot of the number of search hits changes over time
 plot(res_covid)
-qplot(res_covid_city$covid, res_covid_city$trump)
 ```
 
 ## Google Trends + ACS
@@ -232,7 +221,7 @@ acs_il <- acs_il %>%
 # Cleaning NAME in ACS data by adding location variable to ACS
 
 acs_il$location <-  gsub(", .*", "", acs_il$NAME)
-acs_il$location <- gsub("(city|village|CDP)", "", acs_il$location)
+acs_il$location <- gsub("(city|village|CDP|town)", "", acs_il$location)
 acs_il$location <- trimws(acs_il$location, "right")
 head(acs_il)
 ```
@@ -240,21 +229,27 @@ head(acs_il)
 ### Answer the following questions with the "crime" and "loans" Google trends data and the ACS data.
 
 -   First, check how many cities don't appear in both data sets, i.e. cannot be matched. Then, create a new data set by joining the Google Trends and the ACS data. Keep only cities that appear in both data sets.
-    -   In the ACS dataset, there are 1132 cities that do not appear in the Google Trends data. Conversely, in the Google Trends dataset, there are 13 cities that are not found in the ACS data.
+    -   In the below tables, we are able to see how many cities appear or don't appear in both datasets. Those categorized as `FALSE` under `Google Trends IL Cities in ACS Data` are the number of cities that appear in Google Trends data, but not in the ACS data. Those categorized as `TRUE` under `Google Trends IL Cities in ACS Data` are the number of cities that appear in both the Google Trends data and the ACS data. Similarly, those categorized as `FALSE` under `ACS IL Cities in Google Trends Data` are the number of cities that appear in the ACS data, but not in the Google Trends data. Those categorized as `TRUE` under `ACS IL Cities in Google Trends Data` are the number of cities that appear in both the ACS data and the Google Trends data .
 
 ```{r}
 # Are any of the locations in our search data also in our ACS data?
+# If yes, will print TRUE.
 any(res_city$location %in% acs_il$location)
 
 # Printing how many cities don't appear in both data sets
-summary(res_city$location %in% acs_il$location)
-summary(acs_il$location %in% res_city$location)
+paste("Google Trends IL Cities in ACS Data")
+(summary(res_city$location %in% acs_il$location))
+paste("ACS IL Cities in Google Trends Data")
+(summary(acs_il$location %in% res_city$location))
+```
 
+```{r}
 # Doing an inner join, only keeping variables common to both datasets
-res_city_acs <- inner_join(res_city, acs_il, by = join_by("location" == "location"))
+res_city_acs <- inner_join(res_city, acs_il, 
+                           by = join_by("location" == "location"))
 
-# Doing an inner join, only keeping variables common to both datasets
-res_city_acs <- inner_join(res_city, acs_il, by = join_by("location" == "location"))
+# Printing the number of rows in each dataset to QC our merge matches 
+# the numbers in our logical table above
 nrow(res_city)
 nrow(acs_il)
 nrow(res_city_acs)
@@ -262,29 +257,27 @@ nrow(res_city_acs)
 
 -   Compute the mean of the search popularity for both keywords for cities that have an above average median household income and for those that have an below average median household income. When building your pipe, start with creating the grouping variable and then proceed with the remaining tasks. What conclusions might you draw from this?
 
-    -   The Table 3 below shows the mean of the search popularity for both keywords for cities that have an above average median household income and for those that have an below average median household income.
+    -   Table 5 below shows the mean of the search popularity for both keywords for cities that have an above average median household income and for those that have an below average median household income.
 
 ```{r}
-# compute the mean of the search popularity for both keywords by income group
-popsearchmean <- res_city_acs%>% 
-  mutate(high_hh_income = ifelse(hh_income > mean(hh_income), "Above", "Below")) %>%
+# Compute the mean of the search popularity for both keywords by income group
+popsearchmean <- res_city_acs %>% 
+  mutate(high_hh_income = ifelse(hh_income > mean(hh_income, na.rm = TRUE), 
+                                 "Above", "Below")) %>%
   group_by(high_hh_income) %>%
   summarize(mean_pop_crime = mean(crime),
             mean_pop_loans = mean(loans))
 
-knitr::kable(popsearchmean, caption = "Popularity of Crime and Loans Searches Across Low and High-income Illinois Cities")
+knitr::kable(popsearchmean, caption = "Popularity of Crime and Loans Searches in IL Cities Above and Below the Average Median Household Income")
 ```
 
 -   Is there a relationship between the median household income and the search popularity of the Google trends terms? Describe the relationship and use a scatterplot with `qplot()`.
 
-    -   The correlation between the median household income and the search popularity of the Google Trends for the keyword 'crime' is 0.2. On the other hand, the correlation between the median household income and the search popularity of the Google Trends for the keyword 'loans' is -0.146.
-    -   Scatter plot----\> we don't really see,,,?
+    -   Most of the searches for crime appear to be clustered around lower income levels. There appears to be a slightly negative relationship between searches for crime and median household income.
+    -   Similarly, most of the searches of loans appear to be clustered around lower income levels. However, in this case there is a clearer, stronger downward trajectory of loan searches as income increases.
+    -   The searches seen together with income in different shades of blue paint a clearer picture: there are few high income households searching for loans, but the same isn't true for crime. There appears to be more variability in crime searches across income levels. Meanwhile, there are a few cities with high search frequencies of both crime and loans, which tend to be low or middle income.
 
 ```{r}
-# Running correlations of each
-cor(res_city_acs$hh_income, res_city_acs$crime)
-cor(res_city_acs$hh_income, res_city_acs$loans)
-
 # plot for a relationship between hh_income and crime
 res_city_acs %>%
 qplot(x = hh_income, y = crime, data = ., 
@@ -294,6 +287,7 @@ qplot(x = hh_income, y = crime, data = .,
 res_city_acs %>%
   qplot(x = hh_income, y = loans, data = ., 
             geom = "auto")
+# Plotting 
 ggplot(res_city_acs, aes(crime, loans, colour = hh_income)) + 
   geom_point()
 ```
@@ -302,23 +296,35 @@ ggplot(res_city_acs, aes(crime, loans, colour = hh_income)) +
 
 -   First, check how many cities don't appear in both data sets, i.e. cannot be matched. Then, create a new data set by joining the Google Trends and the ACS data. Keep only cities that appear in both data sets.
 
-    -   In the ACS dataset, there are 851 cities that do not appear in the Google Trends data. Conversely, in the Google Trends dataset, there are 18 cities that are not found in the ACS data.
+    -   In the below tables, we are able to see how many cities appear or don't appear in both datasets.
 
 ```{r}
 # Are any of the locations in our search data also in our ACS data?
+# If yes, will print TRUE.
 any(res_covid_city$location %in% acs_il$location)
 
 # Printing how many cities don't appear in both data sets
+paste("Google Trends IL Cities in ACS Data")
 summary(res_covid_city$location %in% acs_il$location)
+paste("ACS IL Cities in Google Trends Data")
 summary(acs_il$location %in% res_covid_city$location)
+```
 
+```{r}
 # Doing an inner join, only keeping variables common to both datasets
-res_covid_city_acs <- inner_join(res_covid_city, acs_il, by = join_by("location" == "location"))
+res_covid_city_acs <- inner_join(res_covid_city, acs_il, 
+                                 by = join_by("location" == "location"))
+
+# Printing the number of rows in each dataset to QC our merge matches 
+# the numbers in our logical table above
+nrow(res_covid_city)
+nrow(acs_il)
+nrow(res_covid_city_acs)
 ```
 
 -   Compute the mean of the search popularity for both keywords for cities that have an above average median household income and for those that have an below average median household income. When building your pipe, start with creating the grouping variable and then proceed with the remaining tasks. What conclusions might you draw from this?
 
-    -   The Table 4 below shows the mean of the search popularity for both keywords ('covid' and 'trump') for cities that have an average median household income and for those that have an below average median household income.
+    -   Table 6 below shows the mean of the search popularity for both keywords ('covid' and 'trump') for cities that have an average median household income and for those that have an below average median household income.
 
 ```{r}
 # removing NA values in the household income variable
@@ -326,36 +332,34 @@ res_covid_city_acs <- res_covid_city_acs %>%
   drop_na(hh_income)
 
 popsearchmean_covid <- res_covid_city_acs%>% 
-  mutate(high_hh_income = ifelse(hh_income > mean(hh_income), "Above", "Below")) %>%
+  mutate(high_hh_income = ifelse(hh_income > mean(hh_income, na.rm = TRUE), 
+                                 "Above", "Below")) %>%
   group_by(high_hh_income) %>%
   summarize(mean_pop_covid = mean(covid),
             mean_pop_trump = mean(trump))
 
-knitr::kable(popsearchmean_covid, caption = "Popularity of COVID and Trump Searches Across Low and High-income Illinois Cities")
+knitr::kable(popsearchmean_covid, 
+  caption = "Popularity of COVID and Trump Searches Across Low and High-income Illinois Cities")
 ```
 
 -   Is there a relationship between the median household income and the search popularity of the Google trends terms? Describe the relationship and use a scatterplot with `qplot()`.
 
-    -   The correlation between the median household income and the search popularity of the Google Trends for the keyword 'covid' is 0.36. The correlation between the median household income and the search popularity of the Google Trends for the keyword 'trump' is 0.05.
-    
-    -   From the scatter plots below depict a positive correlation between median household income and the search popularity of both the keywords 'covid' and 'trump'. They show that cities with higher median household incomes tend to exhibit elevated search popularity for these Google Trends keywords.
+    -   The scatter plots below depict a positive relationship between median household income and the search popularity of both the keywords 'covid' and 'trump'. They show that cities with higher median household incomes tend to exhibit elevated search popularity for these Google Trends keywords.
+
+    -   There appears to be a strong relationship between high frequency searches for "covid" and median household income. Above median household incomes of \$125,000, there are few cities with low frequency "covid" searches.
+
+    -   There is a slight increase of searches for "trump" as median household income rises. However most of the high frequency searches of "trump" appear to be clustered around median household incomes below \$125,000.
+
+    -   Seen together with income in different shades of blue, it appears there are several cities with medium to high incomes that search for both "trump" and "covid" frequently. However, it appears that high frequency searches for "trump" only occur mostly within cities with lower to medium household incomes. Meanwhile, high frequency searches for "covid" only tend to be in cities with much higher median household incomes overall.
 
 ```{r}
-# Running correlations of each
-cor(res_covid_city_acs$hh_income,res_covid_city_acs$covid)
-cor(res_covid_city_acs$hh_income,res_covid_city_acs$trump)
-
-# Doing qolots of each
+# Doing qplots of each
 res_covid_city_acs %>%
   qplot(x = hh_income, y = covid, data = ., 
         geom = "auto")
 res_covid_city_acs %>%
   qplot(x = hh_income, y = trump, data = ., 
         geom = "auto")
-
-# Doing a regular scatterplot in base R
-plot(res_covid_city_acs$hh_income,res_covid_city_acs$covid)
-plot(res_covid_city_acs$hh_income,res_covid_city_acs$trump)
 
 # Using ggplot
 ggplot(res_covid_city_acs, aes(covid, trump, colour = hh_income)) + 
