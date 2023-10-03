@@ -52,7 +52,8 @@ table(res_time$geo)
 ### Answer the following questions for the keywords "crime" and "loans".
 
 -   Find the mean, median and variance of the search hits for the keywords.
-    -   For the keyword 'crime', the search hits exhibit a mean value of 54.09615, with a median of 53.0 and a variance of 78.99057. The keyword 'loans' has a higher mean of 65.34615, with a median of 64.5 and a variance of 97.99548 for its search hits.
+
+    -   The Table 1 below shows the mean, median, and variance of the search hits for the both keywords 'crime' and 'loans'.
 
 ```{r}
 # mean, median and variance of the search hits for the keywords
@@ -67,7 +68,8 @@ knitr::kable(stat_keywords, caption = "Statistics of the search hits for the key
 ```
 
 -   Which cities (locations) have the highest search frequency for loans? Note that there might be multiple rows for each city if there were hits for both "crime" and "loans" in that city. It might be easier to answer this question if we had the search hits info for both search terms in two separate variables. That is, each row would represent a unique city.
-    -   Long Lake has the highest search frequency for loans, recording a search number of 100, followed by Braceville and Alorton with search numbers of 94.
+
+    -   Long Lake has the highest search frequency for loans.
 
 ```{r}
 # using pivot_wider
@@ -85,7 +87,8 @@ head(res_city)
 ```
 
 -   Is there a relationship between the search intensities between the two keywords we used?
-    -   The correlation between the search intensities of the two keywords is -0.215, indicating a negative correlation. This means that as the search intensity for 'crime' increases, the search intensity for 'loans' tends to decline. From the plot below illustrates this relationship, showing how the number of search hits for these keywords changes over time.
+
+    -   The correlation between the search intensities of the two keywords is -0.2, indicating a negative correlation. This means that as the search intensity for 'crime' increases, the search intensity for 'loans' tends to decline. From the plot below illustrates this relationship, showing how the number of search hits for these keywords changes over time.
 
 ```{r}
 # correlation
@@ -128,7 +131,8 @@ table(res_covid_time$geo)
 Answer the following questions for the keywords "covid" and "trump".
 
 -   Find the mean, median and variance of the search hits for the keywords.
-    -   For the keyword 'covid', the search hits exhibit a mean value of 34.63462, with a median of 36.0 and a variance of 281.6322 The keyword 'trump' has a higher mean of 11.61538, with a median of 9.5 and a variance of 118.8798 for its search hits.
+
+    -   The Table 2 below shows the mean, median, and variance of the search hits for the keywords 'covid' and 'trump'.
 
 ```{r}
 # mean, median and variance of the search hits for the keywords
@@ -143,7 +147,7 @@ knitr::kable(stat_covid_keywords, caption = "Statistics of the search hits for t
 
 -   Which cities (locations) have the highest search frequency for `covid`? (Note that there might be multiple rows for each city if there were hits for keywords in that city. It might be easier to answer this question if we had the search hits info for both search terms in two separate variables. That is, each row would represent a unique city.
 
-    -   Oak Lawn (100), Northbrook (99), and Wheaton (93) have the highest searches for `covid`.
+    -   Oak Lawn (100) has the highest searches for `covid`.
 
 ```{r}
 res_covid_city<- as_tibble(res_covid$interest_by_city)
@@ -170,7 +174,8 @@ head(res_covid_city)
 ```
 
 -   Is there a relationship between the search intensities between the two keywords we used?
-    -   The correlation between the search intensities of the two keywords is -0.462, indicating a negative correlation. This means that as the search intensity for 'covid' rises, the search intensity for 'trump' tends to decrease. The plot below shows the change in the number of search hits for these two keywords over time. (Need to explain more,,?)
+
+    -   The correlation between the search intensities of the two keywords is -0.46, indicating a negative correlation. This means that as the search intensity for 'covid' rises, the search intensity for 'trump' tends to decrease. The plot below shows the change in the number of search hits for these two keywords over time. (Need to explain more,,?)
 
 ```{r}
 # correlation
@@ -256,7 +261,8 @@ nrow(res_city_acs)
 ```
 
 -   Compute the mean of the search popularity for both keywords for cities that have an above average median household income and for those that have an below average median household income. When building your pipe, start with creating the grouping variable and then proceed with the remaining tasks. What conclusions might you draw from this?
-    -   In cities with above-average median household incomes, the mean search popularity for the keyword 'crime' is 17.11024, while in cities with below-average median household incomes, it is 9.05314. Conversely, for the keyword 'loans', the mean search popularity in cities with above-average median household incomes is 15.26772, whereas in cities with below-average median household incomes, it rises to 19.02415.
+
+    -   The Table 3 below shows the mean of the search popularity for both keywords for cities that have an above average median household income and for those that have an below average median household income.
 
 ```{r}
 # compute the mean of the search popularity for both keywords by income group
@@ -270,7 +276,8 @@ knitr::kable(popsearchmean, caption = "Popularity of Crime and Loans Searches Ac
 ```
 
 -   Is there a relationship between the median household income and the search popularity of the Google trends terms? Describe the relationship and use a scatterplot with `qplot()`.
-    -   The correlation between the median household income and the search popularity of the Google Trends for the keyword 'crime' is 0.217. On the other hand, the correlation between the median household income and the search popularity of the Google Trends for the keyword 'loans' is -0.146.
+
+    -   The correlation between the median household income and the search popularity of the Google Trends for the keyword 'crime' is 0.2. On the other hand, the correlation between the median household income and the search popularity of the Google Trends for the keyword 'loans' is -0.146.
     -   Scatter plot----\> we don't really see,,,?
 
 ```{r}
@@ -291,10 +298,11 @@ ggplot(res_city_acs, aes(crime, loans, colour = hh_income)) +
   geom_point()
 ```
 
-###Repeat the above steps using the covid data and the ACS data.
+### Repeat the above steps using the covid data and the ACS data.
 
 -   First, check how many cities don't appear in both data sets, i.e. cannot be matched. Then, create a new data set by joining the Google Trends and the ACS data. Keep only cities that appear in both data sets.
-    -   In the ACS dataset, there are 1130 cities that do not appear in the Google Trends data. Conversely, in the Google Trends dataset, there are 12 cities that are not found in the ACS data.
+
+    -   In the ACS dataset, there are 851 cities that do not appear in the Google Trends data. Conversely, in the Google Trends dataset, there are 18 cities that are not found in the ACS data.
 
 ```{r}
 # Are any of the locations in our search data also in our ACS data?
@@ -309,7 +317,8 @@ res_covid_city_acs <- inner_join(res_covid_city, acs_il, by = join_by("location"
 ```
 
 -   Compute the mean of the search popularity for both keywords for cities that have an above average median household income and for those that have an below average median household income. When building your pipe, start with creating the grouping variable and then proceed with the remaining tasks. What conclusions might you draw from this?
-    -   In cities with above-average median household incomes, the mean search popularity for the keyword 'covid' is 48.94615, while in cities with below-average median household incomes, it is 29.42157. For the keyword 'trump', the mean search popularity in cities with above-average median household incomes is 26.90769, and in cities with below-average median household incomes, it rises to 22.68627.
+
+    -   The Table 4 below shows the mean of the search popularity for both keywords ('covid' and 'trump') for cities that have an average median household income and for those that have an below average median household income.
 
 ```{r}
 # removing NA values in the household income variable
@@ -326,7 +335,9 @@ knitr::kable(popsearchmean_covid, caption = "Popularity of COVID and Trump Searc
 ```
 
 -   Is there a relationship between the median household income and the search popularity of the Google trends terms? Describe the relationship and use a scatterplot with `qplot()`.
-    -   The correlation between the median household income and the search popularity of the Google Trends for the keyword 'covid' is 0.37. The correlation between the median household income and the search popularity of the Google Trends for the keyword 'trump' is 0.049.
+
+    -   The correlation between the median household income and the search popularity of the Google Trends for the keyword 'covid' is 0.36. The correlation between the median household income and the search popularity of the Google Trends for the keyword 'trump' is 0.05.
+    
     -   From the scatter plots below depict a positive correlation between median household income and the search popularity of both the keywords 'covid' and 'trump'. They show that cities with higher median household incomes tend to exhibit elevated search popularity for these Google Trends keywords.
 
 ```{r}
