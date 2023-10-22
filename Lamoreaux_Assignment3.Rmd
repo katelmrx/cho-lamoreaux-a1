@@ -1,0 +1,275 @@
+---
+title: 'Assignment #3'
+author: "Kate Lamoreaux"
+date: "2023-10-22"
+output: pdf_document
+---
+
+
+## GitHub Repository
+
+<https://github.com/katelmrx/cho-lamoreaux-a1>
+
+```{r}
+library(xml2)
+library(rvest)
+library(tidyverse)
+```
+
+## Web Scraping
+
+In this assignment, your task is to scrape some information from Wikipedia. We start with the following page about Grand Boulevard, a Chicago Community Area.
+
+<https://en.wikipedia.org/wiki/Grand_Boulevard,_Chicago>
+
+The ultimate goal is to gather the table "Historical population" and convert it to a `data.frame`.
+
+As a first step, read in the html page as an R object. Extract the tables from this object (using the `rvest` package) and save the result as a new object. Follow the instructions if there is an error. Use `str()` on this new object \-- it should be a list. Try to find the position of the "Historical population" in this list since we need it in the next step.
+
+```{r}
+# Reading in the html page as R object url_gb
+url_gb <- read_html("https://en.wikipedia.org/wiki/Grand_Boulevard,_Chicago")
+```
+
+```{r}
+# Extracting the tables from object url_gb (using the `rvest` package) 
+nds_tables <- html_elements(url_gb, xpath = '//table')
+```
+
+```{r}
+# Using `str()` on new object nds_tables, which is a list
+str(nds_tables)
+```
+
+```{r}
+# Using html_table() on the nds_tables object to search for the 
+# "Historical population" table within this list 
+table_details <- html_table(nds_tables)
+head(table_details)
+```
+
+Historical population is in \[2\] on the list.
+
+Extract the "Historical population" table from the list and save it as another object. You can use subsetting via `[[…]]` to extract pieces from a list. Print the result.
+
+```{r}
+# Extracting the "Historical population" table from list table_details 
+# Saving this as object histpop
+histpop <- table_details[[2]]
+# Printing histpop
+print(histpop)
+```
+
+You will see that the table needs some additional formatting. We only want rows and columns with actual values (I called the table object `pop`).
+
+```{r}
+# Keeping only rows and columns with actual values
+histpopqc <- histpop[2:10, -3]
+```
+
+## Expanding to More Pages
+
+That's it for this page. However, we may want to repeat this process for other community areas. The Wikipedia page https://en.wikipedia.org/wiki/Grand_Boulevard,\_Chicago has a section on "Places adjacent to Grand Boulevard, Chicago" at the bottom. Can you find the corresponding table in the list of tables that you created earlier? Extract this table as a new object.
+
+```{r}
+(gb_adj <- table_details[[4]])
+```
+
+Then, grab the community areas east of Grand Boulevard and save them as a character vector. Print the result.
+
+```{r}
+library(stringi)
+(east_gb <- gb_adj$X3 %>% stri_remove_empty_na())
+```
+
+We want to use this list to create a loop that extracts the population tables from the Wikipedia pages of these places. To make this work and build valid urls, we need to replace empty spaces in the character vector with underscores. This can be done with `gsub()`, or by hand. The resulting vector should look like this: "Oakland,\_Chicago" "Kenwood,\_Chicago" "Hyde_Park,\_Chicago" -\> DO ALL OF THEM NOT JUST THREE THERE ARE LIKE 5 OR 6 IT IS IN THE COMPASS THINGY
+
+```{r}
+(east_gb <- gsub(" ", "_", east_gb))
+```
+
+To prepare the loop, we also want to copy our `pop` table and rename it as `pops`. In the loop, we append this table by adding columns from the other community areas.
+
+```{r}
+histpops <- histpopqc
+```
+
+Build a small loop to test whether you can build valid urls using the vector of places and pasting each element of it after `https://en.wikipedia.org/wiki/` in a for loop. Calling `url` shows the last url of this loop, which should be `https://en.wikipedia.org/wiki/Hyde_Park,_Chicago`.
+
+```{r}
+# Building a small test loop
+for(i in east_gb) {
+   url <- paste0("https://en.wikipedia.org/wiki/",i, sep = "")
+   src <- read_html(url)
+  print(url)   }
+
+url
+```
+
+Finally, extend the loop and add the code that is needed to grab the population tables from each page. Add columns to the original table `pops` using `cbind()`.
+
+```{r}
+# Extending the loop
+for(i in east_gb) {
+   url <- paste0("https://en.wikipedia.org/wiki/",i)
+   src <- read_html(url)
+  print(url)   
+
+  # Extracting the tables from object src (using the `rvest` package) 
+nds_tables <- html_elements(src, xpath = '//table')
+  
+  
+# Using html_table() on the nds_tables object  
+table_details <- html_table(nds_tables)
+
+# Extracting the "Historical population" table from list table_details 
+# Saving this as object pop
+pop <- table_details[[2]]
+
+# Keeping only rows and columns with actual values
+popqc <- pop[2:10, -3]
+
+histpops <- cbind(histpops, popqc)
+  
+}
+
+histpops
+str(histpops)
+```
+
+
+## Scraping and Analyzing Text Data
+
+Suppose we wanted to take the actual text from the Wikipedia pages instead of just the information in the table. Our goal in this section is to extract the text from the body of the pages, then do some basic text cleaning and analysis.
+
+First, scrape just the text without any of the information in the margins or headers. For example, for "Grand Boulevard", the text should start with, "**Grand Boulevard** on the [South Side](https://en.wikipedia.org/wiki/South_Side,_Chicago "South Side, Chicago") of [Chicago](https://en.wikipedia.org/wiki/Chicago "Chicago"), [Illinois](https://en.wikipedia.org/wiki/Illinois "Illinois"), is one of the ...". Make sure all of the text is in one block by using something like the code below (I called my object `description`).
+
+
+```{r}
+nds_text_src <- html_elements(url_gb, xpath = "//ul[(((count(preceding-sibling::*) + 1) = 23) and parent::*)]//li | //p")
+
+#Reading html text
+description <- html_text(nds_text_src)
+
+# Make sure all of the text is in one block
+description <- description %>% paste(collapse = ' ')
+
+description
+```
+
+Using a similar loop as in the last section, grab the descriptions of the various communities areas. Make a tibble with two columns: the name of the location and the text describing the location.
+
+```{r}
+descriptions <- description
+```
+
+```{r}
+# Using another loop
+for(i in east_gb) {
+   url <- paste0("https://en.wikipedia.org/wiki/",i)
+   src <- read_html(url)
+  print(url)   
+
+ # Text source
+  nds_text_src <- html_elements(src, xpath = "//ul[(((count(preceding-sibling::*) + 1) = 23) and parent::*)]//li | //p")
+
+# Extracting the tables from object nds_text_src 
+description <- html_text(nds_text_src)
+
+# Make sure all of the text is in one block
+description <- description %>% paste(collapse = ' ')
+
+descriptions <- rbind(descriptions, description)
+}
+
+str(descriptions)
+```
+```{r}
+descriptions_df <- as.tibble(descriptions)
+
+chi_neighborhood <- data.frame(
+  "neighborhood" = c("Grand Boulevard","Oakland", "Kenwood","Hyde Park"),
+  "text_tescription" = descriptions_df$V1)
+
+chi_neighborhood <- as.tibble(chi_neighborhood)
+head(chi_neighborhood)
+```
+
+
+Let's clean the data using `tidytext`. If you have trouble with this section, see the example shown in <https://www.tidytextmining.com/tidytext.html>
+
+```{r}
+library(tidytext)
+```
+
+Create tokens using `unnest_tokens`. Make sure the data is in one-token-per-row format. Remove any stop words within the data. What are the most common words used overall?
+
+```{r}
+tokens_chi_neighborhood <-  chi_neighborhood %>%
+  unnest_tokens(word, text_tescription)
+
+head(tokens_chi_neighborhood)
+```
+
+```{r}
+data(stop_words)
+
+tokens_chi_neighborhood <- tokens_chi_neighborhood %>%
+  anti_join(stop_words)
+head(tokens_chi_neighborhood)
+```
+
+Plot the most common words within each location. What are some of the similarities between the locations? What are some of the differences?
+
+```{r}
+(grouped_tokens <- tokens_chi_neighborhood %>%
+  group_by(neighborhood)%>%
+  count(word, sort = TRUE))
+```
+
+```{r}
+library(ggplot2)
+
+
+  grouped_tokens %>%
+  filter(n > 10) %>%
+  ggplot(aes(n, word)) +
+  geom_point(aes(color=neighborhood))
+```
+
+```{r}
+par(mfrow = c(2, 2))
+grouped_tokens %>%
+  filter(neighborhood == "Grand Boulevard") %>%
+ slice(1:6) %>%
+  mutate(word = reorder(word, n)) %>%
+  ggplot(aes(n, word)) +
+  geom_col(fill="gold") +
+  labs(y = "Grand Boulevard")
+
+grouped_tokens %>%
+  filter(neighborhood == "Hyde Park") %>%
+ slice(1:6) %>%
+  mutate(word = reorder(word, n)) %>%
+  ggplot(aes(n, word)) +
+  geom_col(fill="seagreen") +
+  labs(y = "Hyde Park")
+
+grouped_tokens %>%
+  filter(neighborhood == "Kenwood") %>%
+  slice(1:6) %>%
+  mutate(word = reorder(word, n)) %>%
+  ggplot(aes(n, word)) +
+  geom_col(fill="royalblue") +
+  labs(y = "Kenwood")
+
+grouped_tokens %>%
+  filter(neighborhood == "Oakland") %>%
+  slice(1:6) %>%
+  mutate(word = reorder(word, n)) %>%
+  ggplot(aes(n, word)) +
+  geom_col(fill="orchid") +
+  labs(y = "Oakland")
+```
+
+
