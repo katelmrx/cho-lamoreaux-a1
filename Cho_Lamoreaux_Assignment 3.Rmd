@@ -1,0 +1,224 @@
+---
+title: "Assignment 3"
+author: "Sungjoo Cho, Catherine (Kate) Lamoreaux"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Packages
+```{r}
+library(xml2)
+library(rvest)
+library(tidyverse)
+library(robotstxt)
+library(janeaustenr)
+library(dplyr)
+library(stringr)
+library(tidytext)
+library(dplyr)
+library(tidytext)
+```
+
+
+## Web Scraping
+
+## Wikipedia
+```{r}
+# To look at whether we are allowed to do web scraping
+paths_allowed("https://en.wikipedia.org/wiki/Grand_Boulevard,_Chicago")
+
+# give URL and read HTML
+url <- read_html("https://en.wikipedia.org/wiki/Grand_Boulevard,_Chicago")
+str(url)
+```
+
+
+## 1. Grab the html elements
+```{r}
+#xpath
+nds <- html_elements(url, xpath = '//*[contains(concat( " ", @class, " " ), concat( " ", "us-census-pop-left", " " ))]//td | //*[contains(concat( " ", @class, " " ), concat( " ", "us-census-pop-left", " " ))]//th')
+
+# storing html
+tbl <- html_text(nds)
+historical_pop <- tbl[5:44] %>% matrix(ncol=4, byrow = TRUE) %>% as.data.frame()
+
+# change the variable names
+names(historical_pop) <- tbl[1:4]
+
+# drop the third column
+historical_pop <- historical_pop[, c(1, 2, 4)]
+```
+
+
+```{r}
+# by Sungjoo: X path is different (Oakland, Kenwood, Hyde_Park  & Armour_Square, Douglas, Fuller_Park, Washington_Park_) 
+#https://en.wikipedia.org/wiki/Armour_Square,_Chicago
+#https://en.wikipedia.org/wiki/Douglas,_Chicago
+#https://en.wikipedia.org/wiki/Oakland,_Chicago
+#https://en.wikipedia.org/wiki/Fuller_Park,_Chicago
+#https://en.wikipedia.org/wiki/Washington_Park_(community_area),_Chicago
+#https://en.wikipedia.org/wiki/Hyde_Park,_Chicago
+#https://en.wikipedia.org/wiki/Kenwood,_Chicago
+```
+
+
+## 2. Expanding to More Pages
+```{r}
+historical_pops <- historical_pop
+directions <- c("Oakland,_Chicago", "Kenwood,_Chicago", "Hyde_Park,_Chicago")
+population <- data.frame()
+
+# for loop 1 (Oakland, Kenwood, Hyde_Park)
+for (i in directions) {
+  url2 <- paste0("https://en.wikipedia.org/wiki/", i)
+  src2 <- read_html(url2)
+  
+  # xpath
+  nds2 <- html_elements(src2, xpath = '//*[contains(concat( " ", @class, " " ), concat( " ", "us-census-pop-right", " " ))]//td | //*[contains(concat( " ", @class, " " ), concat( " ", "us-census-pop-right", " " ))]//th')
+  names2 <- html_text(nds2)
+  
+  # storing html
+  tbl2 <- html_text(nds2)
+  population <- tbl2[5:44] %>% matrix(ncol=4, byrow = TRUE) %>% as.data.frame()
+  
+  # change the variable names
+  names(population) <- tbl2[1:4]
+  
+  # drop the third column
+  population <- population[, c(2, 4)]
+  
+  #part <- data.frame(names2, population)
+  historical_pops <- cbind(historical_pops, population)
+}
+```
+
+
+## 3. Scraping and Analyzing Text Data
+
+### (1) Creating a corpus
+```{r}
+#xpath
+nds_text <- html_elements(url, xpath = '//p')
+str(nds_text)
+
+description <- html_text(nds_text)
+description
+
+description <- description %>% paste(collapse = ' ')
+```
+
+### (2) Grab the descriptions of the various communities areas using for loop
+```{r}
+# creating a corpus
+directions <- c("Grand_Boulevard,_Chicago", "Oakland,_Chicago", "Kenwood,_Chicago", "Hyde_Park,_Chicago")
+descriptions <- data.frame()
+
+for (i in directions) {
+  url2 <- paste0("https://en.wikipedia.org/wiki/", i)
+  src2 <- read_html(url2)
+  
+  #xpath
+  nds_text <- html_elements(src2, xpath = '//p')
+  
+  description <- html_text(nds_text)
+  description <- description %>% paste(collapse = ' ') %>%
+    as.data.frame()
+
+  descriptions <- rbind(descriptions, description)
+}
+```
+
+### (3) Create tokens using unnest tokens. Make sure the data is in one token per row format. Remove any stop words within the data. What are the most common words used overall?
+
+The most common words used overall is 'park' (n=89).
+
+```{r}
+# create tokens using unnest_tokens
+text_df <- tibble(location = c("Grand_Boulevard", "Oakland", "Kenwood", "Hyde_Park"), text = descriptions$.)
+
+
+token <- text_df %>%
+  unnest_tokens(word, text)
+```
+
+```{r}
+# remove stop words
+data("stop_words")
+token <- token %>%
+  anti_join(stop_words)
+
+# find the most common words in all the books as a whole
+token_count <- token %>%
+  count(word, sort = TRUE)
+
+# plot the most common words overall
+token %>%
+  count(word, sort = TRUE) %>%
+  filter(n > 10) %>%
+  mutate(word = reorder(word, n)) %>%
+  ggplot(aes(n, word)) +
+  geom_col() +
+  labs(y = NULL)
+```
+
+### (4) Plot the most common words within each location. What are some of the similarities between the locations? What are some of the differences?
+
+```{r}
+# plot for the most common words within Grand_Boulevard
+token_Grand_Boulevard <- token %>%
+  filter(location == "Grand_Boulevard") %>%
+  count(word, sort = TRUE) %>%
+  filter(n > 3) %>%
+  mutate(word = reorder(word, n)) %>%
+  ggplot(aes(n, word)) +
+  geom_col() +
+  labs(y = NULL)
+
+# plot for the most common words within Oakland
+token_Oakland <- token %>%
+  filter(location == "Oakland") %>%
+  count(word, sort = TRUE) %>%
+  filter(n > 3) %>%
+  mutate(word = reorder(word, n)) %>%
+  ggplot(aes(n, word)) +
+  geom_col() +
+  labs(y = NULL)
+
+# plot for the most common words within Kenwood
+token_Kenwood <- token %>%
+  filter(location == "Kenwood") %>%
+  count(word, sort = TRUE) %>%
+  filter(n > 3) %>%
+  mutate(word = reorder(word, n)) %>%
+  ggplot(aes(n, word)) +
+  geom_col() +
+  labs(y = NULL)
+
+# plot for the most common words within Hyde_Park
+token_Hyde_Park <- token %>%
+  filter(location == "Hyde_Park") %>%
+  count(word, sort = TRUE) %>%
+  filter(n > 5) %>%
+  mutate(word = reorder(word, n)) %>%
+  ggplot(aes(n, word)) +
+  geom_col() +
+  labs(y = NULL)
+```
+
+```{r}
+# plots
+token_Grand_Boulevard
+token_Oakland
+token_Kenwood
+token_Hyde_Park
+```
+
+
+
+
+
+
