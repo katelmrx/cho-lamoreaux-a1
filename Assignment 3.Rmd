@@ -1,6 +1,6 @@
 ---
-title: "homework3_sjc"
-author: "Sungjoo Cho"
+title: "Assignment 3"
+author: "Sungjoo Cho, Catherine (Kate) Lamoreaux"
 date: "`r Sys.Date()`"
 output: pdf_document
 ---
