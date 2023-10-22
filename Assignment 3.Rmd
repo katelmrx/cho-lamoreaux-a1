@@ -1,0 +1,164 @@
+---
+title: "homework3_sjc"
+author: "Sungjoo Cho"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Packages
+```{r}
+library(xml2)
+library(rvest)
+library(tidyverse)
+library(robotstxt)
+library(janeaustenr)
+library(dplyr)
+library(stringr)
+```
+
+## Web Scraping
+
+## Wikipedia
+```{r}
+# To look at whether we are allowed to do web scraping
+paths_allowed("https://en.wikipedia.org/wiki/Grand_Boulevard,_Chicago")
+
+# give URL and read HTML
+url <- read_html("https://en.wikipedia.org/wiki/Grand_Boulevard,_Chicago")
+str(url)
+```
+
+
+## 1. Grab the html elements
+```{r}
+#xpath
+nds <- html_elements(url, xpath = '//*[contains(concat( " ", @class, " " ), concat( " ", "us-census-pop-left", " " ))]//td | //*[contains(concat( " ", @class, " " ), concat( " ", "us-census-pop-left", " " ))]//th')
+str(nds)
+
+# storing html
+tbl <- html_text(nds)
+historical_pop <- tbl[5:44] %>% matrix(ncol=4, byrow = TRUE) %>% as.data.frame()
+
+# change the variable names
+names(historical_pop) <- tbl[1:4]
+
+# drop the third column
+historical_pop <- historical_pop[, c(1, 2, 4)]
+
+str(historical_pop)
+```
+
+
+```{r}
+# by Sungjoo: X path is different (Oakland, Kenwood, Hyde_Park  & Armour_Square, Douglas, Fuller_Park, Washington_Park_) 
+#https://en.wikipedia.org/wiki/Armour_Square,_Chicago
+#https://en.wikipedia.org/wiki/Douglas,_Chicago
+#https://en.wikipedia.org/wiki/Oakland,_Chicago
+#https://en.wikipedia.org/wiki/Fuller_Park,_Chicago
+#https://en.wikipedia.org/wiki/Washington_Park_(community_area),_Chicago
+#https://en.wikipedia.org/wiki/Hyde_Park,_Chicago
+#https://en.wikipedia.org/wiki/Kenwood,_Chicago
+```
+
+
+## 2. Expanding to More Pages
+```{r}
+historical_pops <- historical_pop
+directions <- c("Oakland,_Chicago", "Kenwood,_Chicago", "Hyde_Park,_Chicago")
+population <- data.frame()
+
+# for loop 1 (Oakland, Kenwood, Hyde_Park)
+for (i in directions) {
+  url2 <- paste0("https://en.wikipedia.org/wiki/", i)
+  src2 <- read_html(url2)
+  
+  # xpath
+  nds2 <- html_elements(src2, xpath = '//*[contains(concat( " ", @class, " " ), concat( " ", "us-census-pop-right", " " ))]//td | //*[contains(concat( " ", @class, " " ), concat( " ", "us-census-pop-right", " " ))]//th')
+  names2 <- html_text(nds2)
+  
+  # storing html
+  tbl2 <- html_text(nds2)
+  population <- tbl2[5:44] %>% matrix(ncol=4, byrow = TRUE) %>% as.data.frame()
+  
+  # change the variable names
+  names(population) <- tbl2[1:4]
+  
+  # drop the third column
+  population <- population[, c(2, 4)]
+  
+  #part <- data.frame(names2, population)
+  historical_pops <- cbind(historical_pops, population)
+}
+```
+
+
+## 3. Scraping and Analyzing Text Data
+```{r}
+#xpath
+nds_text <- html_elements(url, xpath = '//p')
+str(nds_text)
+
+description <- html_text(nds_text)
+description
+
+description <- description %>% paste(collapse = ' ')
+```
+
+```{r}
+## Geting data using for loop
+directions <- c("Grand_Boulevard,_Chicago", "Oakland,_Chicago", "Kenwood,_Chicago", "Hyde_Park,_Chicago")
+descriptions <- data.frame()
+
+for (i in directions) {
+  url2 <- paste0("https://en.wikipedia.org/wiki/", i)
+  src2 <- read_html(url2)
+  
+  #xpath
+  nds_text <- html_elements(src2, xpath = '//p')
+  
+  description <- html_text(nds_text)
+  description <- description %>% paste(collapse = ' ') %>%
+    as.data.frame()
+
+  descriptions <- rbind(descriptions, description)
+}
+```
+
+```{r}
+# 1. create tokens using unnest_tokens
+library(dplyr)
+text_df <- tibble(location = c("Grand_Boulevard", "Oakland", "Kenwood", "Hyde_Park"), text = descriptions$.)
+
+library(tidytext)
+token <- text_df %>%
+  unnest_tokens(word, text)
+```
+
+```{r}
+# remove stop words
+data("stop_words")
+token <- token %>%
+  anti_join(stop_words)
+
+token %>%
+  count(word, sort = TRUE)
+
+# ggplot
+library(ggplot2)
+token %>%
+  count(word, sort = TRUE) %>%
+  filter(n > 10) %>%
+  mutate(word = reorder(word, n)) %>%
+  ggplot(aes(n, word)) +
+  geom_col() +
+  labs(y = NULL)
+```
+
+
+
+
+
