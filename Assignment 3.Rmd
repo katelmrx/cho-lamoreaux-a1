@@ -18,7 +18,11 @@ library(robotstxt)
 library(janeaustenr)
 library(dplyr)
 library(stringr)
+library(tidytext)
+library(dplyr)
+library(tidytext)
 ```
+
 
 ## Web Scraping
 
@@ -37,7 +41,6 @@ str(url)
 ```{r}
 #xpath
 nds <- html_elements(url, xpath = '//*[contains(concat( " ", @class, " " ), concat( " ", "us-census-pop-left", " " ))]//td | //*[contains(concat( " ", @class, " " ), concat( " ", "us-census-pop-left", " " ))]//th')
-str(nds)
 
 # storing html
 tbl <- html_text(nds)
@@ -48,8 +51,6 @@ names(historical_pop) <- tbl[1:4]
 
 # drop the third column
 historical_pop <- historical_pop[, c(1, 2, 4)]
-
-str(historical_pop)
 ```
 
 
@@ -97,6 +98,8 @@ for (i in directions) {
 
 
 ## 3. Scraping and Analyzing Text Data
+
+### (1) Creating a corpus
 ```{r}
 #xpath
 nds_text <- html_elements(url, xpath = '//p')
@@ -108,8 +111,9 @@ description
 description <- description %>% paste(collapse = ' ')
 ```
 
+### (2) Grab the descriptions of the various communities areas using for loop
 ```{r}
-## Geting data using for loop
+# creating a corpus
 directions <- c("Grand_Boulevard,_Chicago", "Oakland,_Chicago", "Kenwood,_Chicago", "Hyde_Park,_Chicago")
 descriptions <- data.frame()
 
@@ -128,12 +132,15 @@ for (i in directions) {
 }
 ```
 
+### (3) Create tokens using unnest tokens. Make sure the data is in one token per row format. Remove any stop words within the data. What are the most common words used overall?
+
+The most common words used overall is 'park' (n=89).
+
 ```{r}
-# 1. create tokens using unnest_tokens
-library(dplyr)
+# create tokens using unnest_tokens
 text_df <- tibble(location = c("Grand_Boulevard", "Oakland", "Kenwood", "Hyde_Park"), text = descriptions$.)
 
-library(tidytext)
+
 token <- text_df %>%
   unnest_tokens(word, text)
 ```
@@ -144,11 +151,11 @@ data("stop_words")
 token <- token %>%
   anti_join(stop_words)
 
-token %>%
+# find the most common words in all the books as a whole
+token_count <- token %>%
   count(word, sort = TRUE)
 
-# ggplot
-library(ggplot2)
+# plot the most common words overall
 token %>%
   count(word, sort = TRUE) %>%
   filter(n > 10) %>%
@@ -157,6 +164,59 @@ token %>%
   geom_col() +
   labs(y = NULL)
 ```
+
+### (4) Plot the most common words within each location. What are some of the similarities between the locations? What are some of the differences?
+
+```{r}
+# plot for the most common words within Grand_Boulevard
+token_Grand_Boulevard <- token %>%
+  filter(location == "Grand_Boulevard") %>%
+  count(word, sort = TRUE) %>%
+  filter(n > 3) %>%
+  mutate(word = reorder(word, n)) %>%
+  ggplot(aes(n, word)) +
+  geom_col() +
+  labs(y = NULL)
+
+# plot for the most common words within Oakland
+token_Oakland <- token %>%
+  filter(location == "Oakland") %>%
+  count(word, sort = TRUE) %>%
+  filter(n > 3) %>%
+  mutate(word = reorder(word, n)) %>%
+  ggplot(aes(n, word)) +
+  geom_col() +
+  labs(y = NULL)
+
+# plot for the most common words within Kenwood
+token_Kenwood <- token %>%
+  filter(location == "Kenwood") %>%
+  count(word, sort = TRUE) %>%
+  filter(n > 3) %>%
+  mutate(word = reorder(word, n)) %>%
+  ggplot(aes(n, word)) +
+  geom_col() +
+  labs(y = NULL)
+
+# plot for the most common words within Hyde_Park
+token_Hyde_Park <- token %>%
+  filter(location == "Hyde_Park") %>%
+  count(word, sort = TRUE) %>%
+  filter(n > 5) %>%
+  mutate(word = reorder(word, n)) %>%
+  ggplot(aes(n, word)) +
+  geom_col() +
+  labs(y = NULL)
+```
+
+```{r}
+# plots
+token_Grand_Boulevard
+token_Oakland
+token_Kenwood
+token_Hyde_Park
+```
+
 
 
 
