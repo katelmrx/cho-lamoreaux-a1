@@ -2,7 +2,9 @@
 title: "Assignment 3"
 author: "Sungjoo Cho, Catherine (Kate) Lamoreaux"
 date: "`r Sys.Date()`"
-output: pdf_document
+output:
+  html_document:
+    df_print: paged
 ---
 
 ```{r setup, include=FALSE}
@@ -14,6 +16,7 @@ knitr::opts_chunk$set(echo = TRUE)
 <https://github.com/katelmrx/cho-lamoreaux-a1>
 
 ### Packages
+
 ```{r, message=FALSE}
 library(xml2)
 library(rvest)
@@ -27,15 +30,14 @@ library(ggplot2)
 library(stringi)
 ```
 
-
 ## Web Scraping
 
 ## Wikipedia
+
 ```{r}
 # Review whether we are allowed to do web scraping
 paths_allowed("https://en.wikipedia.org/wiki/Grand_Boulevard,_Chicago")
 ```
-
 Because the result is true, we are allowed to scrape from Wikipedia.
 
 ```{r}
@@ -44,9 +46,9 @@ url_gb <- read_html("https://en.wikipedia.org/wiki/Grand_Boulevard,_Chicago")
 str(url_gb)
 ```
 
-
 ## 1. Grab the html elements
-As a first step, read in the html page as an R object. Extract the tables from this object (using the `rvest` package) and save the result as a new object. Follow the instructions if there is an error. Use `str()` on this new object \-- it should be a list. Try to find the position of the "Historical population" in this list since we need it in the next step.
+
+As a first step, read in the html page as an R object. Extract the tables from this object (using the `rvest` package) and save the result as a new object. Follow the instructions if there is an error. Use `str()` on this new object. It should be a list. Try to find the position of the "Historical population" in this list since we need it in the next step.
 
 ```{r}
 # Extracting the tables from object url_gb (using the `rvest` package) 
@@ -73,22 +75,23 @@ Extract the "Historical population" table from the list and save it as another o
 # Extracting the "Historical population" table from list table_details 
 # Saving this as object pop
 pop <- table_details[[2]]
+
 # Printing pop
 print(pop)
 ```
 
 ```{r}
 # Keeping only rows and columns with actual values
-pop <- pop[2:10, -3]
+pop <- pop[1:10, -3]
 pop
 ```
 
-
 ## 2. Expanding to More Pages
 
-That's it for this page. However, we may want to repeat this process for other community areas. The Wikipedia page https://en.wikipedia.org/wiki/Grand_Boulevard,\_Chicago has a section on "Places adjacent to Grand Boulevard, Chicago" at the bottom. Can you find the corresponding table in the list of tables that you created earlier? Extract this table as a new object.
+That's it for this page. However, we may want to repeat this process for other community areas. The Wikipedia page [https://en.wikipedia.org/wiki/Grand_Boulevard,\\\_Chicago](https://en.wikipedia.org/wiki/Grand_Boulevard,_Chicago){.uri} has a section on "Places adjacent to Grand Boulevard, Chicago" at the bottom. Can you find the corresponding table in the list of tables that you created earlier? Extract this table as a new object.
 
 The "Places adjacent to Grand Boulevard, Chicago" table is in [4] of the table_details list.
+
 ```{r}
 # Extracting "Places adjacent to Grand Boulevard, Chicago" table
 # Assigning this table to object gb_adj
@@ -129,7 +132,6 @@ for(i in east_gb) {
 url
 ```
 
-
 Finally, extend the loop and add the code that is needed to grab the population tables from each page. Add columns to the original table `pops` using `cbind()`.
 
 ```{r}
@@ -150,23 +152,24 @@ for(i in east_gb) {
   pop <- table_details[[2]]
 
 # Keeping only rows and columns with actual values
-  pop <- pop[2:10, -3]
+  pop <- pop[1:10, -3]
 
 pops <- cbind(pops, pop)
   
 }
 
-head(pops)
+pops
 str(pops)
 ```
 
-
 ## 3. Scraping and Analyzing Text Data
+
 Suppose we wanted to take the actual text from the Wikipedia pages instead of just the information in the table. Our goal in this section is to extract the text from the body of the pages, then do some basic text cleaning and analysis.
 
 First, scrape just the text without any of the information in the margins or headers. For example, for "Grand Boulevard", the text should start with, "**Grand Boulevard** on the [South Side](https://en.wikipedia.org/wiki/South_Side,_Chicago "South Side, Chicago") of [Chicago](https://en.wikipedia.org/wiki/Chicago "Chicago"), [Illinois](https://en.wikipedia.org/wiki/Illinois "Illinois"), is one of the ...".
 
 ### (1) Creating a corpus
+
 ```{r}
 # Extracting desired text elements from webpage
 nds_text <- html_elements(url_gb, xpath = "//p")
@@ -196,7 +199,7 @@ for(i in east_gb) {
   print(url)   
 
  # Text source
-  nds_text_src <- html_elements(src, xpath = "//ul[(((count(preceding-sibling::*) + 1) = 23) and parent::*)]//li | //p")
+  nds_text_src <- html_elements(src, xpath = "//p")
 
 # Extracting the tables from object nds_text_src 
 description <- html_text(nds_text_src)
@@ -230,6 +233,7 @@ head(chi_neighborhood)
 # Creating tokens using unnest_tokens
 chi_tokens <- chi_neighborhood %>%
   unnest_tokens(word, description_text)
+
 # Making sure the data is in one token per row format
 head(chi_tokens)
 ```
@@ -242,11 +246,11 @@ chi_tokens <- chi_tokens %>%
 head(chi_tokens)
 ```
 
-
 ```{r}
 # Count the most common words used overall
 token_count <- chi_tokens %>%
   count(word, sort = TRUE)
+head(token_count)
 
 # Plot the most common words used overall
 token_count %>%
@@ -313,8 +317,7 @@ token_Kenwood
 token_Hyde_Park
 ```
 
-
-The most common words used in the Grand Boulevard description are: "boulevard", "grand", and "chicag"o.
+The most common words used in the Grand Boulevard description are: "boulevard", "grand", and "chicago".
 
 The most common words used in the Oakland description are: "oakland", "chicago", and "housing".
 
