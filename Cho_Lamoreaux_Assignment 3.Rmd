@@ -3,7 +3,10 @@ title: "Assignment 3"
 author: "Sungjoo Cho, Catherine (Kate) Lamoreaux"
 date: "`r Sys.Date()`"
 output:
+  word_document: default
+  pdf_document: default
   html_document:
+    pdf_document: null
     df_print: paged
 ---
 
@@ -38,17 +41,18 @@ library(stringi)
 # Review whether we are allowed to do web scraping
 paths_allowed("https://en.wikipedia.org/wiki/Grand_Boulevard,_Chicago")
 ```
+
 Because the result is true, we are allowed to scrape from Wikipedia.
+
+## 1. Grab the html elements
+
+*As a first step, read in the html page as an R object. Extract the tables from this object (using the `rvest` package) and save the result as a new object. Follow the instructions if there is an error. Use `str()` on this new object. It should be a list. Try to find the position of the "Historical population" in this list since we need it in the next step.*
 
 ```{r}
 # # Reading in the html page as R object url
 url_gb <- read_html("https://en.wikipedia.org/wiki/Grand_Boulevard,_Chicago")
 str(url_gb)
 ```
-
-## 1. Grab the html elements
-
-As a first step, read in the html page as an R object. Extract the tables from this object (using the `rvest` package) and save the result as a new object. Follow the instructions if there is an error. Use `str()` on this new object. It should be a list. Try to find the position of the "Historical population" in this list since we need it in the next step.
 
 ```{r}
 # Extracting the tables from object url_gb (using the `rvest` package) 
@@ -69,7 +73,7 @@ head(table_details)
 
 The "Historical population" table is in [[2]] of the table_details list.
 
-Extract the "Historical population" table from the list and save it as another object. You can use subsetting via `[[…]]` to extract pieces from a list. Print the result.
+*Extract the "Historical population" table from the list and save it as another object. You can use subsetting via `[[…]]` to extract pieces from a list. Print the result.*
 
 ```{r}
 # Extracting the "Historical population" table from list table_details 
@@ -88,9 +92,9 @@ pop
 
 ## 2. Expanding to More Pages
 
-That's it for this page. However, we may want to repeat this process for other community areas. The Wikipedia page [https://en.wikipedia.org/wiki/Grand_Boulevard,\\\_Chicago](https://en.wikipedia.org/wiki/Grand_Boulevard,_Chicago){.uri} has a section on "Places adjacent to Grand Boulevard, Chicago" at the bottom. Can you find the corresponding table in the list of tables that you created earlier? Extract this table as a new object.
+*That's it for this page. However, we may want to repeat this process for other community areas. The Wikipedia page [https://en.wikipedia.org/wiki/Grand_Boulevard,\\\_Chicago](https://en.wikipedia.org/wiki/Grand_Boulevard,_Chicago){.uri} has a section on "Places adjacent to Grand Boulevard, Chicago" at the bottom. Can you find the corresponding table in the list of tables that you created earlier? Extract this table as a new object.*
 
-The "Places adjacent to Grand Boulevard, Chicago" table is in [4] of the table_details list.
+*The "Places adjacent to Grand Boulevard, Chicago" table is in [4] of the table_details list.*
 
 ```{r}
 # Extracting "Places adjacent to Grand Boulevard, Chicago" table
@@ -98,7 +102,7 @@ The "Places adjacent to Grand Boulevard, Chicago" table is in [4] of the table_d
 (gb_adj <- table_details[[4]])
 ```
 
-Then, grab the community areas east of Grand Boulevard and save them as a character vector. Print the result.
+*Then, grab the community areas east of Grand Boulevard and save them as a character vector. Print the result.*
 
 ```{r}
 # Saving communities east of Grand Boulevard and removing blank characters from
@@ -106,7 +110,7 @@ Then, grab the community areas east of Grand Boulevard and save them as a charac
 (east_gb <- gb_adj$X3 %>% stri_remove_empty_na())
 ```
 
-We want to use this list to create a loop that extracts the population tables from the Wikipedia pages of these places. To make this work and build valid urls, we need to replace empty spaces in the character vector with underscores. This can be done with `gsub()`, or by hand. The resulting vector should look like this: "Oakland,\_Chicago" "Kenwood,\_Chicago" "Hyde_Park,\_Chicago"
+*We want to use this list to create a loop that extracts the population tables from the Wikipedia pages of these places. To make this work and build valid urls, we need to replace empty spaces in the character vector with underscores. This can be done with `gsub()`, or by hand. The resulting vector should look like this: "Oakland,\_Chicago" "Kenwood,\_Chicago" "Hyde_Park,\_Chicago"*
 
 ```{r}
 # Using gsub to replace the empty spaces of the character vector east_gb
@@ -114,13 +118,13 @@ We want to use this list to create a loop that extracts the population tables fr
 (east_gb <- gsub(" ", "_", east_gb))
 ```
 
-To prepare the loop, we also want to copy our `pop` table and rename it as `pops`. In the loop, we append this table by adding columns from the other community areas.
+*To prepare the loop, we also want to copy our `pop` table and rename it as `pops`. In the loop, we append this table by adding columns from the other community areas.*
 
 ```{r}
 pops <- pop
 ```
 
-Build a small loop to test whether you can build valid urls using the vector of places and pasting each element of it after `https://en.wikipedia.org/wiki/` in a for loop. Calling `url` shows the last url of this loop, which should be `https://en.wikipedia.org/wiki/Hyde_Park,_Chicago`.
+*Build a small loop to test whether you can build valid urls using the vector of places and pasting each element of it after `https://en.wikipedia.org/wiki/` in a for loop. Calling `url` shows the last url of this loop, which should be `https://en.wikipedia.org/wiki/Hyde_Park,_Chicago`.*
 
 ```{r}
 # Building a small test loop
@@ -132,7 +136,7 @@ for(i in east_gb) {
 url
 ```
 
-Finally, extend the loop and add the code that is needed to grab the population tables from each page. Add columns to the original table `pops` using `cbind()`.
+*Finally, extend the loop and add the code that is needed to grab the population tables from each page. Add columns to the original table `pops` using `cbind()`.*
 
 ```{r}
 # Extending the loop
@@ -164,9 +168,9 @@ str(pops)
 
 ## 3. Scraping and Analyzing Text Data
 
-Suppose we wanted to take the actual text from the Wikipedia pages instead of just the information in the table. Our goal in this section is to extract the text from the body of the pages, then do some basic text cleaning and analysis.
+*Suppose we wanted to take the actual text from the Wikipedia pages instead of just the information in the table. Our goal in this section is to extract the text from the body of the pages, then do some basic text cleaning and analysis.*
 
-First, scrape just the text without any of the information in the margins or headers. For example, for "Grand Boulevard", the text should start with, "**Grand Boulevard** on the [South Side](https://en.wikipedia.org/wiki/South_Side,_Chicago "South Side, Chicago") of [Chicago](https://en.wikipedia.org/wiki/Chicago "Chicago"), [Illinois](https://en.wikipedia.org/wiki/Illinois "Illinois"), is one of the ...".
+*First, scrape just the text without any of the information in the margins or headers. For example, for "Grand Boulevard", the text should start with, "**Grand Boulevard** on the [South Side](https://en.wikipedia.org/wiki/South_Side,_Chicago "South Side, Chicago") of [Chicago](https://en.wikipedia.org/wiki/Chicago "Chicago"), [Illinois](https://en.wikipedia.org/wiki/Illinois "Illinois"), is one of the ...".*
 
 ### (1) Creating a corpus
 
@@ -184,7 +188,7 @@ str(nds_text)
 
 ### (2) Grab the descriptions of the various communities areas using for loop
 
-Using a similar loop as in the last section, grab the descriptions of the various communities areas. Make a tibble with two columns: the name of the location and the text describing the location.
+*Using a similar loop as in the last section, grab the descriptions of the various communities areas. Make a tibble with two columns: the name of the location and the text describing the location.*
 
 ```{r}
 # Making a copy of description to prepare the loop
@@ -214,16 +218,16 @@ descriptions <- rbind(descriptions, description)
 str(descriptions)
 ```
 
-```{r}
+```{r, warning=FALSE}
 # Making a tibble with two columns: the name of the location and 
 # the text describing the location.
-descriptions_df <- as.tibble(descriptions)
+descriptions_df <- as_tibble(descriptions)
 
 chi_neighborhood <- data.frame(
   "neighborhood" = c("Grand Boulevard","Oakland", "Kenwood","Hyde Park"),
   "description_text" = descriptions_df$V1)
 
-chi_neighborhood <- as.tibble(chi_neighborhood)
+chi_neighborhood <- as_tibble(chi_neighborhood)
 head(chi_neighborhood)
 ```
 
