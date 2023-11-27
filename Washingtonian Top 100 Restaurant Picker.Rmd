@@ -1,0 +1,96 @@
+---
+title: "Washingtonian Top 100 Restaurant Picker"
+author: "Kate Lamoreaux"
+date: "2023-10-28"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Libraries
+
+#Feedback from Brian: How do we optimize restaurant choices? Building an interactive tool. MAke sure you have a clear goal in mind. RQ = can be goal we have in mind.
+
+Ideas: could link `$$$$` ratings/star ratings/mapdata/website from google, star ratings from yelp (use yelp api; scraping is illegal).
+
+```{r}
+library(xml2)
+library(rvest)
+library(tidyverse)
+library(tidytext)
+library(jsonlite)
+library(robotstxt)
+library(RSocrata)
+```
+
+
+
+```{r}
+# see whether I can scrape
+paths_allowed("https://www.washingtonian.com/2023/01/25/the-100-very-best-restaurants-in-washington-dc/")
+```
+
+Since this is true, I can scrape!
+
+```{r}
+# Reading in the html page as R object url
+url <- read_html("https://www.washingtonian.com/2023/01/25/the-100-very-best-restaurants-in-washington-dc/")
+```
+
+```{r}
+# Extracting the nodes from object url (using the `rvest` package) 
+nds <- html_elements(url, xpath = '//*[contains(concat( " ", @class, " " ), concat( " ", "sm-tw-py-0", " " ))]')
+
+str(nds)
+```
+
+```{r}
+names <- html_text(nds)
+head(names)
+```
+
+```{r}
+#convert to a tibble
+tophundred <- as_tibble(names)
+head(tophundred)
+```
+```{r}
+tophundred$value[1]
+```
+
+```{r}
+# Remove "\n"
+
+library(stringr)
+tophundred$value <- gsub("[\n]+", "sepcol", tophundred$value)
+tophundred$value[1]
+```
+
+
+```{r}
+# Remove "sepcolRead Our ReviewsepcolVisit Website sepcol"
+tophundred$value <- gsub("sepcolRead Our ReviewsepcolVisit Website sepcol", "", tophundred$value)
+head(tophundred)
+```
+
+```{r}
+#Using separate to clean and label columns
+tophundred_clean <- tophundred %>%
+  separate(value,c("blank","ranking","name", "ranking2", "name2", "genre", "address", "phone number"), 'sepcol') 
+head(tophundred_clean)
+```
+
+
+```{r}
+tophundred_final <- tophundred_clean %>%
+  select(-c("blank", "ranking2", "name2"))
+head(tophundred_final)
+```
+
+
+```{r}
+library(writexlsx)
+exportlist <- write_excel_csv(tophundred_final, "/cloud/project/wasingtonian_top100.xlsx")
+```
