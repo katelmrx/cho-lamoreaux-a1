@@ -31,7 +31,7 @@ library(knitr)
 ## Exploring ACS Data
 
 ```{r include=FALSE}
-cs_key <- "839176755fb51cd99853fa546eac00eb08b203fa"
+cs_key <- readLines("/Users/sungjoocho/Desktop/UMD/Fall2023/SURV727/Assignment/Assignment5/cs_key.TeX")
 ```
 
 
