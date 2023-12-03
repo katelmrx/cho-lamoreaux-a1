@@ -1,6 +1,6 @@
 ---
 title: "Assignment 5"
-author: "Sungjoo Cho"
+author: "Sungjoo Cho and Kate Lamoreaux"
 date: "`r Sys.Date()`"
 output: pdf_document
 ---
@@ -55,7 +55,7 @@ il_map <- map_data("county", region = "illinois")
 head(il_map)
 ```
 
-Join the ACS data with the map data. Not that il_map has a column subregion which includes county names. We need a corresponding variable in the ACS data to join both data sets. This needs some transformations, among which the function tolower() might be useful. Call the joined data acs_map.
+Join the ACS data with the map data. Note that il_map has a column subregion which includes county names. We need a corresponding variable in the ACS data to join both data sets. This needs some transformations, among which the function tolower() might be useful. Call the joined data acs_map.
 
 ```{r}
 # creating county_name variable in acs_il
@@ -123,12 +123,12 @@ plot(hc_complete, main = "Complete Linkage", xlab = "", sub = "")
 # average method
 plot(hc_average, main = "Average Linkage", xlab = "", sub = "")
 
-rect.hclust(hc_ward, 
+try <- rect.hclust(hc_ward, 
             k = 5, 
             border = "red")
 ```
 
-We want to create four clusters based on the `hc_ward` object.
+We want to create five clusters based on the `hc_ward` object.
 ```{r}
 cutree(hc_ward, 5)
 ```
@@ -222,27 +222,30 @@ As you might have seen earlier, it's not always clear which number of clusters i
 
 We want to utilize this function to iterate over multiple Ks (e.g., K = 2, ..., 10) and \-- each time \-- add the resulting cluster membership as a new variable to our (cleaned) original data frame (`acs_il_t`). There are multiple solutions for this task, e.g. think about the `apply` family or `for` loops.
 ```{r}
-# create function
-function_kmeans <- function(data, K) {
-  cluster_data <- data %>%
+# Specifying the dataset we want to use when calling the function
+cluster_data <- acs_il_t %>%
     select(pop, hh_income, income)
-  kmeans_result <- kmeans(cluster_data, K)
-  acs_il_t <- acs_il_t %>%
-    mutate(K = as.factor(kmeans_result$cluster))
-  return(acs_il_t)
-}
 
-# K values
-Ks <- 2:10
-
-for (K in Ks) {
-  function_kmeans(acs_il_t_cleaned, K)
+# Writing the function to automate K Means clustering
+function_kmeans <- function(data, K_clusters) {
+  # Looping over each value in K, which could be a vector
+  for (k in K_clusters) {
+    # Performing K means clustering
+  kmeans_result <- kmeans(cluster_data, centers = k, nstart = 10)
+  # Adding resulting cluster membership to the original data frame
+    cluster_col_name <- paste0("Cluster_K", k)
+    data[[cluster_col_name]] <- kmeans_result$cluster
+  }
+  return(data)
 }
 ```
 
+
 Finally, display the first rows of the updated data set (with multiple cluster columns).
 ```{r}
-head(acs_il_t)
+# K values
+Ks <- 2:10
+head(function_kmeans(acs_il_t, Ks))
 ```
 
 
