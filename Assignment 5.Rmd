@@ -186,7 +186,7 @@ Since we want to use K Means in this section, we start by determining the optima
 
 * We choose k = 6 as the optimal number of clusters.
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 # finding the optimal number of K
 fviz_nbclust(acs_il_t_cleaned, kmeans, method = "wss", k.max = 20)
 ```
@@ -200,6 +200,10 @@ km <- kmeans(acs_il_t_cleaned, 6, nstart = 20)
 
 Find the mean population, household income and per capita income grouped by clusters. In addition, display the most frequent county that can be observed within each cluster.
 ```{r}
+# creating county_name variable in acs_il_t
+acs_il_t$subregion <- gsub("Census Tract ", "", acs_il_t$NAME)
+acs_il_t$subregion <- gsub("^[^,]*, ", "", acs_il_t$subregion)
+
 # adding cluster variable
 acs_il_t_cluster <- acs_il_t %>%
   mutate(cluster = km$cluster)
@@ -210,7 +214,7 @@ stat <- acs_il_t_cluster %>%
   summarize(mean_pop = mean(pop),
             mean_hh_income = mean(hh_income),
             mean_income = mean(income),
-            most_frequent_county = names(which.max(table(NAME))))
+            most_frequent_county = names(which.max(table(subregion))))
 
 # table
 kable(stat, caption = "Statistics")
