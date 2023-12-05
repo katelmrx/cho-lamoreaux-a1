@@ -114,16 +114,16 @@ hc_average <- hclust(hclust_d, method = "average")
 
 Plot the dendrogram to find a reasonable number of clusters. Draw boxes around the clusters of your cluster solution.
 ```{r}
-# ward method
-plot(hc_ward, main = "Ward", xlab = "", sub = "")
-
 # complete method
 plot(hc_complete, main = "Complete Linkage", xlab = "", sub = "")
 
 # average method
 plot(hc_average, main = "Average Linkage", xlab = "", sub = "")
 
-try <- rect.hclust(hc_ward, 
+# ward method
+plot(hc_ward, main = "Ward", xlab = "", sub = "")
+
+rect.hclust(hc_ward, 
             k = 5, 
             border = "red")
 ```
@@ -194,7 +194,8 @@ fviz_nbclust(acs_il_t_cleaned, kmeans, method = "wss", k.max = 20)
 Run `kmeans()` for the optimal number of clusters based on the plot above.
 ```{r}
 # kmeans
-km <- kmeans(acs_il_t_cleaned, 6, nstart = 20)
+set.seed(24601)
+(km <- kmeans(acs_il_t_cleaned, 6, nstart = 20))
 ```
 
 
@@ -204,9 +205,11 @@ Find the mean population, household income and per capita income grouped by clus
 acs_il_t$subregion <- gsub("Census Tract ", "", acs_il_t$NAME)
 acs_il_t$subregion <- gsub("^[^,]*, ", "", acs_il_t$subregion)
 
+
 # adding cluster variable
 acs_il_t_cluster <- acs_il_t %>%
   mutate(cluster = km$cluster)
+
 
 # mean population, household income and per capita income grouped by clusters
 stat <- acs_il_t_cluster %>%
