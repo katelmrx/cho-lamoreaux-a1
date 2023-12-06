@@ -9,6 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+
 ## Libraries
 
 #Feedback from Brian: How do we optimize restaurant choices? Building an interactive tool. MAke sure you have a clear goal in mind. RQ = can be goal we have in mind.
@@ -23,9 +24,13 @@ library(tidytext)
 library(jsonlite)
 library(robotstxt)
 library(RSocrata)
+library(googleway)
+library(httr)
+library(readxl)
 ```
 
 
+## 1. Washingtonian Web Scraping
 
 ```{r}
 # see whether I can scrape
@@ -89,8 +94,39 @@ tophundred_final <- tophundred_clean %>%
 head(tophundred_final)
 ```
 
+```{r}
+# exporting the data
+install.packages("openxlsx")
+library(openxlsx)
+exportlist <- write.xlsx(tophundred_final, "/Users/sungjoocho/Desktop/UMD/Fall2023/SURV727/Group_assignment/cho-lamoreaux-a1/wasingtonian_top100.xlsx")
+```
+
+
+## Data
+```{r}
+# Data from Washingtonion
+washingtonion <- read_excel("/Users/sungjoocho/Desktop/UMD/Fall2023/SURV727/FinalProject/washingtonian-restaurants/wasingtonian_top100.xlsx")
+washingtonion$ranking <- 1:100
+
+# create key_name variable for merging
+washingtonion$key_name <- gsub("[^A-Za-z0-9]", "", washingtonion$name)
+head(washingtonion)
+```
 
 ```{r}
-library(writexlsx)
-exportlist <- write_excel_csv(tophundred_final, "/cloud/project/wasingtonian_top100.xlsx")
+# Data from Yelp
+yelp <- read.csv("/Users/sungjoocho/Desktop/UMD/Fall2023/SURV727/FinalProject/output.csv")
+
+# creating key_name variable for merging
+yelp$key_name <- gsub("&", "and", yelp$name) # change & to "and"
+yelp$key_name <- gsub("[^A-Za-z0-9]", "", yelp$key_name)
+head(yelp)
+
+# merge yelp data to washingtonion
+washington_yelp <- washingtonion %>% left_join(yelp, by = "key_name")
+head(washington_yelp)
 ```
+
+
+
+
