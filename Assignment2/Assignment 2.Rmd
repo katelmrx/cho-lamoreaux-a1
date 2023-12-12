@@ -12,6 +12,9 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+## The Link to the GitHub Repo
+* https://github.com/katelmrx/cho-lamoreaux-a1.git
+
 ## Packages
 
 ```{r message=FALSE, warning=FALSE, include=FALSE}
@@ -22,6 +25,7 @@ library(magrittr)
 library(ggplot2)
 library(base)
 library(dplyr)
+library(tidyr)
 ```
 
 ## Pulling from APIs
@@ -98,7 +102,6 @@ plot(res)
 -   We tried several different combinations of keywords, including "trump", "death", "mask", and "virus." We found that "death" and "mask" were not searched nearly as frequently as "covid." "Virus" searches peaked early, during the onset of the U.S. lockdowns, but rapidly decreased, stabilizing around June 2020. In contrast, searches for "trump" remained high throughout 2020.
 
 ```{r}
-
 #Commenting out code above to see if multiple keywords break the code.
 res_covid <- gtrends(c("covid", "trump"),
                geo = "US-IL", 
@@ -178,7 +181,10 @@ plot(res_covid)
 ## Google Trends + ACS
 
 ```{r include=FALSE}
-cs_key <- "839176755fb51cd99853fa546eac00eb08b203fa"
+file <- "/Users/sungjoocho/Desktop/UMD/Fall2023/SURV727/Assignment/Assignment2/cs_key.tex"
+key <- readLines(file)
+key <- gsub("\\s*$", "", key)
+cs_key <- key
 ```
 
 ### Pulling Data

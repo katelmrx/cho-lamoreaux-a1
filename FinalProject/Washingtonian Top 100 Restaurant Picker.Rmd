@@ -1,8 +1,10 @@
 ---
 title: "Washingtonian Top 100 Restaurant Picker"
-author: "Kate Lamoreaux"
+author: "Sungjoo Cho and Kate Lamoreaux"
 date: "2023-10-28"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -61,13 +63,13 @@ head(names)
 tophundred <- as_tibble(names)
 head(tophundred)
 ```
+
 ```{r}
 tophundred$value[1]
 ```
 
 ```{r}
 # Remove "\n"
-
 library(stringr)
 tophundred$value <- gsub("[\n]+", "sepcol", tophundred$value)
 tophundred$value[1]
@@ -95,28 +97,32 @@ head(tophundred_final)
 ```
 
 ```{r}
-# exporting the data
-install.packages("openxlsx")
-library(openxlsx)
-exportlist <- write.xlsx(tophundred_final, "/Users/sungjoocho/Desktop/UMD/Fall2023/SURV727/Group_assignment/cho-lamoreaux-a1/wasingtonian_top100.xlsx")
+# # exporting the data
+# install.packages("openxlsx")
+# library(openxlsx)
+# exportlist <- write.xlsx(tophundred_final, "/Users/sungjoocho/Desktop/UMD/Fall2023/SURV727/Group_assignment/cho-lamoreaux-a1/wasingtonian_top100.xlsx")
 ```
 
 
-## Data
+## 2. Yelp API Data
 ```{r}
-# Data from Washingtonion
-washingtonion <- read_excel("/Users/sungjoocho/Desktop/UMD/Fall2023/SURV727/FinalProject/washingtonian-restaurants/wasingtonian_top100.xlsx")
-washingtonion$ranking <- 1:100
+# Load Data from Yelp (obtained using Python)
+yelp <- read.csv("output.csv")
+head(yelp)
+```
 
-# create key_name variable for merging
-washingtonion$key_name <- gsub("[^A-Za-z0-9]", "", washingtonion$name)
-head(washingtonion)
+
+## 3. Merging Washingtonion Web Scraping Data and Yelp API Data
+
+We found discrepancies in restaurant names between Washingtonian and Yelp data, such as 'Pineapple and Pearls' in Washingtonian versus 'Pineapple & Pearls' in Yelp. To address this, we created a new variable called 'key_name' for merging these datasets. This variable eliminates all special characters and spaces to ensure accurate matching.
+
+```{r}
+# create key_name variable for merging in tophundred_final dataset 
+tophundred_final$key_name <- gsub("[^A-Za-z0-9]", "", tophundred_final$name)
+head(tophundred_final)
 ```
 
 ```{r}
-# Data from Yelp
-yelp <- read.csv("/Users/sungjoocho/Desktop/UMD/Fall2023/SURV727/FinalProject/output.csv")
-
 # creating key_name variable for merging
 yelp$key_name <- gsub("&", "and", yelp$name) # change & to "and"
 yelp$key_name <- gsub("[^A-Za-z0-9]", "", yelp$key_name)
@@ -125,7 +131,19 @@ head(yelp)
 # merge yelp data to washingtonion
 washington_yelp <- washingtonion %>% left_join(yelp, by = "key_name")
 head(washington_yelp)
+
+washington_yelp_combine <- washington_yelp[, c("ranking", "name.x", "genre", "address.x", "rating", "price")]
+head(washington_yelp_combine)
+
+colnames <- c("washingtonion ranking", "name", "genre", "address", "yelp rating", "price")
+names(washington_yelp_combine) <- colnames
+head(washington_yelp_combine)
 ```
+
+```{r}
+# exportlist <- write.xlsx(washington_yelp_combine, "/Users/sungjoocho/Desktop/UMD/Fall2023/SURV727/Group_assignment/cho-lamoreaux-a1/washington_yelp_combine.xlsx")
+```
+
 
 
 
