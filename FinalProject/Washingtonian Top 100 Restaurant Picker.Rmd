@@ -18,7 +18,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 Ideas: could link `$$$$` ratings/star ratings/mapdata/website from google, star ratings from yelp (use yelp api; scraping is illegal).
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 library(xml2)
 library(rvest)
 library(tidyverse)
@@ -107,12 +107,17 @@ head(tophundred_final)
 ## 2. Yelp API Data
 ```{r}
 # Load Data from Yelp (obtained using Python)
-yelp <- read.csv("output.csv")
-head(yelp)
+yelp <- read.csv("yelp.csv")
+yelp <- as.tibble(yelp)
+```
+
+## 3. Google Places API Data
+```{r}
+
 ```
 
 
-## 3. Merging Washingtonion Web Scraping Data and Yelp API Data
+## 4. Merging Washingtonion Web Scraping Data and Yelp API Data
 
 We found discrepancies in restaurant names between Washingtonian and Yelp data, such as 'Pineapple and Pearls' in Washingtonian versus 'Pineapple & Pearls' in Yelp. To address this, we created a new variable called 'key_name' for merging these datasets. This variable eliminates all special characters and spaces to ensure accurate matching.
 
@@ -120,29 +125,35 @@ We found discrepancies in restaurant names between Washingtonian and Yelp data, 
 # create key_name variable for merging in tophundred_final dataset 
 tophundred_final$key_name <- gsub("[^A-Za-z0-9]", "", tophundred_final$name)
 head(tophundred_final)
-```
 
-```{r}
-# creating key_name variable for merging
+# creating key_name variable for merging in yelp dataset
 yelp$key_name <- gsub("&", "and", yelp$name) # change & to "and"
 yelp$key_name <- gsub("[^A-Za-z0-9]", "", yelp$key_name)
 head(yelp)
-
-# merge yelp data to washingtonion
-washington_yelp <- washingtonion %>% left_join(yelp, by = "key_name")
-head(washington_yelp)
-
-washington_yelp_combine <- washington_yelp[, c("ranking", "name.x", "genre", "address.x", "rating", "price")]
-head(washington_yelp_combine)
-
-colnames <- c("washingtonion ranking", "name", "genre", "address", "yelp rating", "price")
-names(washington_yelp_combine) <- colnames
-head(washington_yelp_combine)
 ```
 
 ```{r}
-# exportlist <- write.xlsx(washington_yelp_combine, "/Users/sungjoocho/Desktop/UMD/Fall2023/SURV727/Group_assignment/cho-lamoreaux-a1/washington_yelp_combine.xlsx")
+# merge yelp data to washingtonion
+washington_yelp <- tophundred_final %>% left_join(yelp, by = "key_name")
+head(washington_yelp)
 ```
+
+## 4. Data Cleaning
+
+```{r}
+# remove key_name variables
+washington_yelp <- washington_yelp[, c("ranking", "name.x", "genre", "categories", "address.x", "address.y", "phone number", "phone", "rating", "price", "latitude", "longitude")]
+
+# export data for manual cleaning
+library(openxlsx)
+write.xlsx(washington_yelp, "/Users/sungjoocho/Desktop/UMD/Fall2023/SURV727/Group_assignment/cho-lamoreaux-a1/FinalProject/washington_yelp.xlsx")
+
+# load manually cleaned data
+library(readxl)
+data <- read_excel("washington_yelp.xlsx")
+head(data)
+```
+
 
 
 
