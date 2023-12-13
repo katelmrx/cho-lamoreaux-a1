@@ -13,10 +13,10 @@ library(leaflet)
 
 library(readxl) 
 
-restaurants_list <- read_excel("/cloud/project/FinalProject/restaurants_cleaned.xlsx")
+restaurants <- read_excel("/cloud/project/FinalProject/restaurants_cleaned.xlsx")
 
-getColor <- function(restaurants_list) {
-  sapply(restaurants_list$top25_wm, function(top25_wm) {
+getColor <- function(restaurants) {
+  sapply(restaurants$top25_wm, function(top25_wm) {
     if(top25_wm == 1) {
       "red"
     } else {
@@ -26,21 +26,64 @@ getColor <- function(restaurants_list) {
 
 icons <- awesomeIcons(
   icon = 'cutlery',
-  markerColor = getColor(restaurants_list)
+  markerColor = getColor(restaurants)
 )
+
+##Adding in optimizing restaurant pick function
+
+## 6. Writing a Function
+find_restaurants <- function(genre = NULL, rating = NULL, price_level = NULL, top25_wm = NULL) {
+  
+  # use a copy of the original dataset
+  result <- restaurants
+  
+  # filter based on genre
+  if (!is.null(genre)) {
+    result <- result[result$genre == genre, ]
+  }
+  
+  # filter based on rating
+  if (!is.null(rating)) {
+    result <- result[result$rating_avg >= rating, ]
+  }
+  
+  # filter based on price_level
+  if (!is.null(price_level)) {
+    result <- result[result$price_avg == price_level, ]
+  }
+  
+  # filter based on top25_wm
+  if (!is.null(top25_wm)) {
+    result <- result[result$top25_wm == top25_wm, ]
+  }
+  
+  result <- result %>% filter(!is.na(result$name))
+  return(result)
+}
+
+# example usage:
+filtered_restaurants <- find_restaurants(genre="Italian", rating=3, price_level=4, top25_wm=1)
+filtered_restaurants 
+
+###
 
 
 ui <- fluidPage(
   leafletOutput("testmap"),
   p(),
   actionButton("randomPointButton", "Pick for me!"),
-  actionButton("refreshButton", "Refresh the map")
+  actionButton("refreshButton", "Refresh the map"),
+  textInput("userInputGenre", "Enter Type of Food"),
+  numericInput("numRating", "Rating", value = 1, min = 1),
+  numericInput("numPrice", "Price-level", value = 1, min = 1),
+  numericInput("numtop25", "Type 1 if you want a Top 25 Washingtonian Magazine Restaurant, otherwise type 0", value = 1, min = 0),
+  actionButton("userInputButton", "What's my match?")
 )
 
 server <- function(input, output) {
   
   # Original data
-  originalData <- reactiveVal(restaurants_list)
+  originalData <- reactiveVal(restaurants)
   
   # Render the map
   output$testmap <- renderLeaflet({
@@ -65,6 +108,21 @@ server <- function(input, output) {
       clearMarkers() %>%
       addAwesomeMarkers(data = originalData(), lng = ~longitude, lat = ~latitude, icon=icons, popup = ~as.character(name), label = ~as.character(name))
   })
+  
+  # User input button event
+  observeEvent(input$userInputButton, {
+    inputNames <- strsplit(input$userInputGenre, ",")[[1]]
+    numRating <- input$numRating
+    numPrice <- input$numPrice
+    numtop25 <- input$numtop25
+
+    selectedRestaurants <- find_restaurants(inputNames, numRating, numPrice, numtop25)
+    
+    leafletProxy("testmap") %>%
+      clearMarkers() %>%
+      addAwesomeMarkers(data = selectedRestaurants, lng = selectedRestaurants$longitude, lat = selectedRestaurants$latitude, icon = icons, popup = selectedRestaurants$name, label = selectedRestaurants$name)
+  })
+  
   
   # Ensure that the map is initially drawn with the original data
   observe({
