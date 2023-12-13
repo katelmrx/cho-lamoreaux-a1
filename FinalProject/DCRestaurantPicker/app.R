@@ -11,7 +11,7 @@ library(shiny)
 
 library(leaflet)
 
-library(readxl)
+library(readxl) 
 
 restaurants_list <- read_excel("/cloud/project/FinalProject/restaurants_cleaned.xlsx")
 
