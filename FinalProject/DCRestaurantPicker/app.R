@@ -17,7 +17,14 @@ library(dplyr)
 
 restaurants <- read_excel("/cloud/project/FinalProject/restaurants_cleaned.xlsx")
 
-restaurants$labelcontent <- paste(sep = "<br/>","<b><a href='",restaurants$website,"'>",restaurants$name,"</a></b>",
+restaurants$hyperlink <- paste("href='",restaurants$website,"'>")
+
+restaurants$hyperlink  <- gsub(" ", "", restaurants$hyperlink)
+
+restaurants$hyperlink  <- paste("<b><a",restaurants$hyperlink,restaurants$name,"</a></b>")
+
+
+restaurants$labelcontent <- paste(sep = "<br/>",restaurants$hyperlink,
                                   restaurants$address,restaurants$phone_number,restaurants$genre,"<b><a", "Average Star Rating", restaurants$rating_avg,"</a></b>", "<b><a","Average Price in $s", restaurants$price_avg,"</a></b>")
 
 
@@ -85,7 +92,7 @@ ui <- fluidPage(
   actionButton("top25Button", "Washingtonian Magazine's Top 25 Restaurants"),
   sliderInput("maxPrice", "Choose Maximum Price in Dollar Signs", min = 1, max = 4, value = 1),
   actionButton("filterPrice", "Filter by Price"),
-  sliderInput("minStarRating", "Choose Minimum Star Rating", min = 3, max = 4.9, value = 1),
+  sliderInput("minStarRating", "Choose Minimum Star Rating", min = 3, max = 4.9, value = 3),
   actionButton("filterStarRating", "Filter by Star Rating"),
   textInput("userInputGenre", "Enter Type of Food", value = ""),
   numericInput("numRating", "Star Rating", value = NA),
