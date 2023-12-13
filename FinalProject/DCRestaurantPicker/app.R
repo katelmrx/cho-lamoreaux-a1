@@ -13,7 +13,14 @@ library(leaflet)
 
 library(readxl) 
 
+library(dplyr)
+
 restaurants <- read_excel("/cloud/project/FinalProject/restaurants_cleaned.xlsx")
+
+restaurants$labelcontent <- paste(sep = "<br/>","<b><a href='",restaurants$website,"'>",restaurants$name,"</a></b>",
+                                  restaurants$address,restaurants$phone_number,restaurants$genre,"<b><a", "Average Star Rating", restaurants$rating_avg,"</a></b>", "<b><a","Average Price in $s", restaurants$price_avg,"</a></b>")
+
+
 
 getColor <- function(restaurants) {
   sapply(restaurants$top25_wm, function(top25_wm) {
@@ -31,7 +38,6 @@ icons <- awesomeIcons(
 
 ##Adding in optimizing restaurant pick function
 
-## 6. Writing a Function
 find_restaurants <- function(genre = NULL, rating = NULL, price_level = NULL, top25_wm = NULL) {
   
   # use a copy of the original dataset
@@ -65,6 +71,9 @@ find_restaurants <- function(genre = NULL, rating = NULL, price_level = NULL, to
 filtered_restaurants <- find_restaurants(genre="Italian", rating=3, price_level=4, top25_wm=1)
 filtered_restaurants 
 
+
+
+
 ###
 
 
@@ -73,6 +82,11 @@ ui <- fluidPage(
   p(),
   actionButton("randomPointButton", "Pick for me!"),
   actionButton("refreshButton", "Refresh the map"),
+  actionButton("top25Button", "Washingtonian Magazine's Top 25 Restaurants"),
+  sliderInput("maxPrice", "Choose Maximum Price in Dollar Signs", min = 1, max = 4, value = 1),
+  actionButton("filterPrice", "Filter by Price"),
+  sliderInput("minStarRating", "Choose Minimum Star Rating", min = 3, max = 4.9, value = 1),
+  actionButton("filterStarRating", "Filter by Star Rating"),
   textInput("userInputGenre", "Enter Type of Food", value = ""),
   numericInput("numRating", "Star Rating", value = NA),
   numericInput("numPrice", "Price-level (Enter 1-4)", value = NA),
@@ -80,7 +94,7 @@ ui <- fluidPage(
   actionButton("userInputButton", "What's my match?")
 )
 
-server <- function(input, output) {
+server <- function(input, output, session) {
   
   # Original data
   originalData <- reactiveVal(restaurants)
@@ -89,25 +103,52 @@ server <- function(input, output) {
   output$testmap <- renderLeaflet({
     testmap <- leaflet(data = originalData()) %>%
       addProviderTiles(providers$CartoDB.Positron) %>%
-      addAwesomeMarkers(lng = ~longitude, lat = ~latitude, icon=icons, popup = ~as.character(name), label = ~as.character(name))
+      addAwesomeMarkers(lng = ~longitude, lat = ~latitude, icon=icons, popup = restaurants$labelcontent, label = ~as.character(name))
   })
   
   # Random point button event
   observeEvent(input$randomPointButton, {
     randomIndex <- sample(1:nrow(originalData()), 1)
-    randomPoint <- originalData()[randomIndex, c("latitude", "longitude", "name")]
+    randomPoint <- originalData()[randomIndex, c("latitude", "longitude", "labelcontent","name")]
     
     leafletProxy("testmap") %>%
       clearMarkers() %>%
-      addAwesomeMarkers(lng = randomPoint$longitude, lat = randomPoint$latitude, icon = icons, popup = randomPoint$name, label = randomPoint$name)
+      addAwesomeMarkers(lng = randomPoint$longitude, lat = randomPoint$latitude, icon = icons, popup = randomPoint$labelcontent, label = randomPoint$name)
   })
   
   # Refresh button event
   observeEvent(input$refreshButton, {
     leafletProxy("testmap") %>%
       clearMarkers() %>%
-      addAwesomeMarkers(data = originalData(), lng = ~longitude, lat = ~latitude, icon=icons, popup = ~as.character(name), label = ~as.character(name))
+      addAwesomeMarkers(data = originalData(), lng = ~longitude, lat = ~latitude, icon=icons, popup = restaurants$labelcontent, label = ~as.character(name))
   })
+  
+  # Show only Washingtonian Mag's Top 25 button event
+  observeEvent(input$top25Button, {
+    top25 <- restaurants[restaurants$top25_wm == 1, ]
+    leafletProxy("testmap") %>%
+      clearMarkers() %>%
+      addAwesomeMarkers(data = top25, lng = ~longitude, lat = ~latitude, icon=icons, popup = restaurants$labelcontent, label = ~as.character(name))
+  })
+  
+  # Filter button event
+  observeEvent(input$filterPrice, {
+    maxPrice <- input$maxPrice
+    filteredData1<- (restaurants[restaurants$price_avg<= maxPrice, ])
+    leafletProxy("testmap") %>%
+      clearMarkers() %>%
+      addAwesomeMarkers(data = filteredData1, lng = ~longitude, lat = ~latitude, icon=icons, popup = restaurants$labelcontent, label = ~as.character(name)) 
+  })
+  
+  # Filter button event
+  observeEvent(input$filterStarRating, {
+    minStarRating <- input$minStarRating
+    filteredData2<- (restaurants[restaurants$rating_avg >= minStarRating, ])
+    leafletProxy("testmap") %>%
+      clearMarkers() %>%
+      addAwesomeMarkers(data = filteredData2, lng = ~longitude, lat = ~latitude, icon=icons, popup = restaurants$labelcontent, label = ~as.character(name)) 
+  })
+  
   
   # User input button event
   observeEvent(input$userInputButton, {
@@ -123,7 +164,7 @@ server <- function(input, output) {
    if (nrow(selectedRestaurants) > 0) {
       leafletProxy("testmap") %>%
         clearMarkers() %>%
-       addAwesomeMarkers(data = selectedRestaurants, lng = selectedRestaurants$longitude, lat = selectedRestaurants$latitude, icon = icons, popup = selectedRestaurants$name, label = selectedRestaurants$name)
+       addAwesomeMarkers(data = selectedRestaurants, lng = selectedRestaurants$longitude, lat = selectedRestaurants$latitude, icon = icons, popup = selectedRestaurants$labelcontent, label = selectedRestaurants$name)
     } else {
       showModal(modalDialog(
         title = "Error",
@@ -147,7 +188,7 @@ server <- function(input, output) {
   observe({
     leafletProxy("testmap") %>%
       clearMarkers() %>%
-      addAwesomeMarkers(data = originalData(), lng = ~longitude, lat = ~latitude, icon=icons, popup = ~as.character(name), label = ~as.character(name))
+      addAwesomeMarkers(data = originalData(), lng = ~longitude, lat = ~latitude, icon=icons, popup = restaurants$labelcontent, label = ~as.character(name))
   })
   
 }
