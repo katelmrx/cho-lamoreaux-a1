@@ -24,7 +24,7 @@ library(leaflet)
          #    xlab = 'Waiting time to next eruption (in mins)',
           #   main = 'Histogram of waiting times')
   #  })
-#}
+#} 
 
 # Run the application 
 #shinyApp(ui = ui, server = server)
@@ -36,6 +36,7 @@ names(r_colors) <- colors()
 ui <- fluidPage(
   leafletOutput("testmap"),
   p(),
+  actionButton("recalc", "Pick for me!")
 )
 
 server <- function(input, output, session) {
