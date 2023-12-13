@@ -1,0 +1,292 @@
+---
+title: "Washingtonian Top 100 Restaurant Picker"
+author: "Sungjoo Cho and Kate Lamoreaux"
+date: "2023-10-28"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Libraries
+
+#Feedback from Brian: How do we optimize restaurant choices? Building an interactive tool. MAke sure you have a clear goal in mind. RQ = can be goal we have in mind.
+
+Ideas: could link `$$$$` ratings/star ratings/mapdata/website from google, star ratings from yelp (use yelp api; scraping is illegal).
+
+```{r message=FALSE, warning=FALSE}
+library(xml2)
+library(rvest)
+library(tidyverse)
+library(tidytext)
+library(jsonlite)
+library(robotstxt)
+library(RSocrata)
+library(googleway)
+library(httr)
+library(readxl)
+library(openxlsx)
+library(readxl)
+library(knitr)
+```
+
+
+## 1. Washingtonian Web Scraping
+
+```{r}
+# see whether I can scrape
+paths_allowed("https://www.washingtonian.com/2023/01/25/the-100-very-best-restaurants-in-washington-dc/")
+```
+
+Since this is true, I can scrape!
+
+```{r}
+# Reading in the html page as R object url
+url <- read_html("https://www.washingtonian.com/2023/01/25/the-100-very-best-restaurants-in-washington-dc/")
+```
+
+```{r}
+# Extracting the nodes from object url (using the `rvest` package) 
+nds <- html_elements(url, xpath = '//*[contains(concat( " ", @class, " " ), concat( " ", "sm-tw-py-0", " " ))]')
+
+str(nds)
+```
+
+```{r}
+names <- html_text(nds)
+head(names)
+```
+
+```{r}
+#convert to a tibble
+tophundred <- as_tibble(names)
+head(tophundred)
+```
+
+```{r}
+tophundred$value[1]
+```
+
+```{r}
+# Remove "\n"
+library(stringr)
+tophundred$value <- gsub("[\n]+", "sepcol", tophundred$value)
+tophundred$value[1]
+```
+
+
+```{r}
+# Remove "sepcolRead Our ReviewsepcolVisit Website sepcol"
+tophundred$value <- gsub("sepcolRead Our ReviewsepcolVisit Website sepcol", "", tophundred$value)
+head(tophundred)
+```
+
+```{r}
+#Using separate to clean and label columns
+tophundred_clean <- tophundred %>%
+  separate(value,c("blank","ranking","name", "ranking2", "name2", "genre", "address", "phone number"), 'sepcol') 
+head(tophundred_clean)
+```
+
+
+```{r}
+tophundred_final <- tophundred_clean %>%
+  select(-c("blank", "ranking2", "name2"))
+head(tophundred_final)
+```
+
+```{r}
+# # exporting the data
+# install.packages("openxlsx")
+# library(openxlsx)
+# exportlist <- write.xlsx(tophundred_final, "/Users/sungjoocho/Desktop/UMD/Fall2023/SURV727/Group_assignment/cho-lamoreaux-a1/wasingtonian_top100.xlsx")
+```
+
+
+## 2. Yelp API Data
+```{r}
+# Load Data from Yelp (obtained using Python)
+yelp <- read.csv("yelp.csv")
+yelp <- as.tibble(yelp)
+```
+
+
+## 3. Merging Washingtonion Web Scraping Data and Yelp API Data
+
+We found discrepancies in restaurant names between Washingtonian and Yelp data, such as 'Pineapple and Pearls' in Washingtonian versus 'Pineapple & Pearls' in Yelp. To address this, we created a new variable called 'key_name' for merging these datasets. This variable eliminates all special characters and spaces to ensure accurate matching.
+
+```{r}
+# create key_name variable for merging in tophundred_final dataset 
+tophundred_final$key_name <- gsub("[^A-Za-z0-9]", "", tophundred_final$name)
+head(tophundred_final)
+
+# creating key_name variable for merging in yelp dataset
+yelp$key_name <- gsub("&", "and", yelp$name) # change & to "and"
+yelp$key_name <- gsub("[^A-Za-z0-9]", "", yelp$key_name)
+head(yelp)
+```
+
+```{r}
+# merge yelp data to washingtonion
+washington_yelp <- tophundred_final %>% left_join(yelp, by = "key_name")
+head(washington_yelp)
+```
+
+```{r}
+# remove key_name variables
+washington_yelp <- washington_yelp[, c("ranking", "name.x", "genre", "categories", "address.x", "address.y", "phone number", "phone", "rating", "price", "latitude", "longitude")]
+
+# export data for manual cleaning
+#library(openxlsx)
+#write.xlsx(washington_yelp, "/Users/sungjoocho/Desktop/UMD/Fall2023/SURV727/Group_assignment/cho-lamoreaux-a1/FinalProject/washington_yelp.xlsx")
+
+# load manually cleaned data
+library(readxl)
+data <- read_excel("washington_yelp_cleaned.xlsx")
+head(data)
+```
+
+
+## 3. Google Places API Data
+```{r}
+library(googleway)
+api_key <- readLines("api_key.tex")
+google_places <- tibble(name = character(),
+                        address = character(),
+                        latitude = numeric(),
+                        longitude = numeric(),
+                        rating = numeric(),
+                        price_level = numeric(),
+                        phone_number = character(),
+                        website = character(),
+                        user_rating_total = numeric()
+                        )
+
+for(i in 1:nrow(data)) {
+  current_row <- data[i,]
+  current_row_name_sub <- gsub("&|and", "", current_row$name)
+  places_data <- google_places(search_string = paste(current_row_name_sub, current_row$address, sep=" "),
+                               key = api_key)
+  result <- places_data["results"]
+  if (length(result) == 0) {
+    current_data <- tibble(name = current_row$name,
+                           address = "",
+                           latitude = 0,
+                           longitude = 0,
+                           rating = 0,
+                           price_level = 0,
+                           phone_number = "",
+                           website = "",
+                           user_rating_total = 0)
+  } 
+  else {
+    first_result <- result[1]
+    place_id_result <- first_result$results$place_id
+    if (length(gregexpr('"[^"]+"', first_result$results$place_id)[1]) > 1) {
+      # Extract content within the first pair of double quotes
+      place_id_result <- sub('^"([^"]+)".*', '\\1', first_result$results$place_id)
+    } else {
+      # If there's only one pair or none, keep the original string
+      place_id_result <- first_result$results$place_id
+    }
+    
+    place_id_result <- substr(first_result$results$place_id[1], 1, 27)
+    latitude <- first_result$results$geometry$location$lat
+    longitude <- first_result$results$geometry$location$lng
+    place_id <- first_result$results$place_id
+    place_id_result <- substr(first_result$results$place_id[1], 1, 27)
+
+    address <- first_result$results$formatted_address
+    
+    google_places_details <- google_place_details(place_id = place_id_result,
+                                          key = api_key)
+    price_level <- google_places_details$result$price_level
+    rating <- google_places_details$result$rating
+    website <- google_places_details$result$website
+    user_rating_total <- google_places_details$result$user_ratings_total
+    phone <- google_places_details$result$formatted_phone_number
+    current_data <- tibble(name = current_row$name,
+                           address = address,
+                           latitude = latitude,
+                           longitude = longitude,
+                           rating = rating,
+                           price_level = price_level,
+                           phone_number = phone,
+                           website = website,
+                           user_rating_total = user_rating_total)
+  }
+  google_places <- add_row(google_places, current_data)
+  google_places <- google_places %>% distinct(name, .keep_all = TRUE)
+
+}
+
+head(google_places)
+```
+
+
+## 4. Merge Google API data to Washingtonion & Yelp combined dataset
+
+```{r}
+# merge dataset
+restaurants <- data %>% left_join(google_places, by = "name")
+head(restaurants)
+
+# export dataset for manual cleaning
+# write.xlsx(restaurants, "/Users/sungjoocho/Desktop/UMD/Fall2023/SURV727/Group_assignment/cho-lamoreaux-a1/FinalProject/restaurants.xlsx")
+
+# load manually cleaned data (final dataset)
+restaurants <- read_excel("restaurants.xlsx")
+head(restaurants)
+```
+
+## 5. Basic Data Analysis
+```{r}
+par(mfrow=c(2,2))
+
+# histogram of rating
+hist(restaurants$rating, 
+     main="Histogram of Ratings", 
+     xlab="Rating", 
+     col="lightblue",
+     na.rm = TRUE)
+
+# histogram of price
+hist(restaurants$price_level, 
+     main="Histogram of Price Level", 
+     xlab="Price Level",
+     breaks = c(0.5, 1.5, 2.5, 3.5, 4.5),
+     xlim = c(0, 5),
+     col="lightblue",
+     na.rm = TRUE)
+
+# rating and price level grouped by genre
+rest_group <- restaurants %>%
+  group_by(genre) %>%
+  summarise(
+    mean_rating = round(mean(rating, na.rm = TRUE), 3),
+    mean_price = round(mean(price_level, na.rm = TRUE), 3)
+  ) %>%
+  na.omit() %>%
+  arrange(desc(mean_rating))
+
+kable(rest_group, caption = "Rating and Price by Genre")
+```
+
+
+## 6. Writing a Function
+```{r}
+# function
+filter_restaurants <- function(genre, rating, price_level){
+  
+}
+```
+
+
+## 7. Interactive Graphic
+
+
+

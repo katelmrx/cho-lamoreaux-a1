@@ -1,0 +1,1017 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  pdftitle={Assignment 3},
+  pdfauthor={Sungjoo Cho, Catherine (Kate) Lamoreaux},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\title{Assignment 3}
+\author{Sungjoo Cho, Catherine (Kate) Lamoreaux}
+\date{2023-10-24}
+
+\begin{document}
+\maketitle
+
+\hypertarget{our-github-repository}{%
+\subsection{Our GitHub Repository}\label{our-github-repository}}
+
+\url{https://github.com/katelmrx/cho-lamoreaux-a1}
+
+\hypertarget{packages}{%
+\subsubsection{Packages}\label{packages}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(xml2)}
+\FunctionTok{library}\NormalTok{(rvest)}
+\FunctionTok{library}\NormalTok{(tidyverse)}
+\FunctionTok{library}\NormalTok{(robotstxt)}
+\FunctionTok{library}\NormalTok{(janeaustenr)}
+\FunctionTok{library}\NormalTok{(dplyr)}
+\FunctionTok{library}\NormalTok{(stringr)}
+\FunctionTok{library}\NormalTok{(tidytext)}
+\FunctionTok{library}\NormalTok{(ggplot2)}
+\FunctionTok{library}\NormalTok{(stringi)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{web-scraping}{%
+\subsection{Web Scraping}\label{web-scraping}}
+
+\hypertarget{wikipedia}{%
+\subsection{Wikipedia}\label{wikipedia}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Review whether we are allowed to do web scraping}
+\FunctionTok{paths\_allowed}\NormalTok{(}\StringTok{"https://en.wikipedia.org/wiki/Grand\_Boulevard,\_Chicago"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##  en.wikipedia.org
+\end{verbatim}
+
+\begin{verbatim}
+## [1] TRUE
+\end{verbatim}
+
+Because the result is true, we are allowed to scrape from Wikipedia.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# \# Reading in the html page as R object url}
+\NormalTok{url\_gb }\OtherTok{\textless{}{-}} \FunctionTok{read\_html}\NormalTok{(}\StringTok{"https://en.wikipedia.org/wiki/Grand\_Boulevard,\_Chicago"}\NormalTok{)}
+\FunctionTok{str}\NormalTok{(url\_gb)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## List of 2
+##  $ node:<externalptr> 
+##  $ doc :<externalptr> 
+##  - attr(*, "class")= chr [1:2] "xml_document" "xml_node"
+\end{verbatim}
+
+\hypertarget{grab-the-html-elements}{%
+\subsection{1. Grab the html elements}\label{grab-the-html-elements}}
+
+As a first step, read in the html page as an R object. Extract the
+tables from this object (using the \texttt{rvest} package) and save the
+result as a new object. Follow the instructions if there is an error.
+Use \texttt{str()} on this new object. It should be a list. Try to find
+the position of the ``Historical population'' in this list since we need
+it in the next step.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Extracting the tables from object url\_gb (using the \textasciigrave{}rvest\textasciigrave{} package) }
+\NormalTok{nds }\OtherTok{\textless{}{-}} \FunctionTok{html\_elements}\NormalTok{(url\_gb, }\AttributeTok{xpath =} \StringTok{\textquotesingle{}//table\textquotesingle{}}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Using \textasciigrave{}str()\textasciigrave{} on new object nds, which is a list}
+\FunctionTok{str}\NormalTok{(nds)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## List of 7
+##  $ :List of 2
+##   ..$ node:<externalptr> 
+##   ..$ doc :<externalptr> 
+##   ..- attr(*, "class")= chr "xml_node"
+##  $ :List of 2
+##   ..$ node:<externalptr> 
+##   ..$ doc :<externalptr> 
+##   ..- attr(*, "class")= chr "xml_node"
+##  $ :List of 2
+##   ..$ node:<externalptr> 
+##   ..$ doc :<externalptr> 
+##   ..- attr(*, "class")= chr "xml_node"
+##  $ :List of 2
+##   ..$ node:<externalptr> 
+##   ..$ doc :<externalptr> 
+##   ..- attr(*, "class")= chr "xml_node"
+##  $ :List of 2
+##   ..$ node:<externalptr> 
+##   ..$ doc :<externalptr> 
+##   ..- attr(*, "class")= chr "xml_node"
+##  $ :List of 2
+##   ..$ node:<externalptr> 
+##   ..$ doc :<externalptr> 
+##   ..- attr(*, "class")= chr "xml_node"
+##  $ :List of 2
+##   ..$ node:<externalptr> 
+##   ..$ doc :<externalptr> 
+##   ..- attr(*, "class")= chr "xml_node"
+##  - attr(*, "class")= chr "xml_nodeset"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Using html\_table() on the nds object to search for the }
+\CommentTok{\# "Historical population" table within this list }
+\NormalTok{table\_details }\OtherTok{\textless{}{-}} \FunctionTok{html\_table}\NormalTok{(nds)}
+\FunctionTok{head}\NormalTok{(table\_details)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [[1]]
+## # A tibble: 26 x 2
+##    `Grand Boulevard`                                           `Grand Boulevard`
+##    <chr>                                                       <chr>            
+##  1 Community area                                              "Community area" 
+##  2 Community Area 38 - Grand Boulevard                         "Community Area ~
+##  3 The Harold Washington Cultural Center                       "The Harold Wash~
+##  4 Location within the city of Chicago                         "Location within~
+##  5 Coordinates: .mw-parser-output .geo-default,.mw-parser-out~ "Coordinates: .m~
+##  6 Country                                                     "United States"  
+##  7 State                                                       "Illinois"       
+##  8 County                                                      "Cook"           
+##  9 City                                                        "Chicago"        
+## 10 Neighborhoods                                               "List\nBronzevil~
+## # i 16 more rows
+## 
+## [[2]]
+## # A tibble: 11 x 4
+##    Census Pop.    .mw-parser-output .sr-only{border:0;clip:rect(0,0,0,0)~1 `%±` 
+##    <chr>  <chr>   <chr>                                                    <chr>
+##  1 1930   87,005  ""                                                       —    
+##  2 1940   103,256 ""                                                       18.7%
+##  3 1950   114,557 ""                                                       10.9%
+##  4 1960   80,036  ""                                                       −30.~
+##  5 1970   80,166  ""                                                       0.2% 
+##  6 1980   53,741  ""                                                       −33.~
+##  7 1990   35,897  ""                                                       −33.~
+##  8 2000   28,006  ""                                                       −22.~
+##  9 2010   21,929  ""                                                       −21.~
+## 10 2020   24,589  ""                                                       12.1%
+## 11 [3][1] [3][1]  "[3][1]"                                                 [3][~
+## # i abbreviated name:
+## #   1: `.mw-parser-output .sr-only{border:0;clip:rect(0,0,0,0);clip-path:polygon(0px 0px,0px 0px,0px 0px);height:1px;margin:-1px;overflow:hidden;padding:0;position:absolute;width:1px;white-space:nowrap}Note`
+## 
+## [[3]]
+## # A tibble: 6 x 17
+##   Places adjacent to Gran~1 Places adjacent to G~2 ``    ``    ``    ``    ``   
+##   <chr>                     <chr>                  <chr> <chr> <chr> <lgl> <lgl>
+## 1 "Armour Square, Chicago\~ "Armour Square, Chica~ "Arm~ Doug~ Oakl~ NA    NA   
+## 2 "Armour Square, Chicago"  "Douglas, Chicago"     "Oak~ <NA>  <NA>  NA    NA   
+## 3 ""                        ""                     ""    <NA>  <NA>  NA    NA   
+## 4 "Fuller Park, Chicago"    "Grand Boulevard, Chi~ "Ken~ <NA>  <NA>  NA    NA   
+## 5 ""                        ""                     ""    <NA>  <NA>  NA    NA   
+## 6 ""                        "Washington Park, Chi~ "Hyd~ <NA>  <NA>  NA    NA   
+## # i abbreviated names: 1: `Places adjacent to Grand Boulevard, Chicago`,
+## #   2: `Places adjacent to Grand Boulevard, Chicago`
+## # i 10 more variables: `` <chr>, `` <chr>, `` <chr>, `` <chr>, `` <chr>,
+## #   `` <chr>, `` <chr>, `` <chr>, `` <chr>, `` <chr>
+## 
+## [[4]]
+## # A tibble: 5 x 3
+##   X1                       X2                         X3                  
+##   <chr>                    <chr>                      <chr>               
+## 1 "Armour Square, Chicago" "Douglas, Chicago"         "Oakland, Chicago"  
+## 2 ""                       ""                         ""                  
+## 3 "Fuller Park, Chicago"   "Grand Boulevard, Chicago" "Kenwood, Chicago"  
+## 4 ""                       ""                         ""                  
+## 5 ""                       "Washington Park, Chicago" "Hyde Park, Chicago"
+## 
+## [[5]]
+## # A tibble: 9 x 2
+##   .mw-parser-output .navbar{display:inline;font-size:88~1 .mw-parser-output .n~2
+##   <chr>                                                   <chr>                 
+## 1 Far North                                               "Rogers Park\nWest Ri~
+## 2 Northwest                                               "Portage Park\nIrving~
+## 3 North                                                   "North Center\nLake V~
+## 4 Central                                                 "Near North Side\nThe~
+## 5 West                                                    "Humboldt Park\nWest ~
+## 6 South                                                   "Armour Square\nDougl~
+## 7 Southwest                                               "Garfield Ridge\nArch~
+## 8 Far Southwest                                           "Ashburn\nAuburn Gres~
+## 9 Far Southeast                                           "Chatham\nAvalon Park~
+## # i abbreviated names:
+## #   1: `.mw-parser-output .navbar{display:inline;font-size:88%;font-weight:normal}.mw-parser-output .navbar-collapse{float:left;text-align:left}.mw-parser-output .navbar-boxtext{word-spacing:0}.mw-parser-output .navbar ul{display:inline-block;white-space:nowrap;line-height:inherit}.mw-parser-output .navbar-brackets::before{margin-right:-0.125em;content:"[ "}.mw-parser-output .navbar-brackets::after{margin-left:-0.125em;content:" ]"}.mw-parser-output .navbar li{word-spacing:-0.125em}.mw-parser-output .navbar a>span,.mw-parser-output .navbar a>abbr{text-decoration:inherit}.mw-parser-output .navbar-mini abbr{font-variant:small-caps;border-bottom:none;text-decoration:none;cursor:inherit}.mw-parser-output .navbar-ct-full{font-size:114%;margin:0 7em}.mw-parser-output .navbar-ct-mini{font-size:114%;margin:0 4em}vteCommunity areas in Chicago`,
+## #   2: `.mw-parser-output .navbar{display:inline;font-size:88%;font-weight:normal}.mw-parser-output .navbar-collapse{float:left;text-align:left}.mw-parser-output .navbar-boxtext{word-spacing:0}.mw-parser-output .navbar ul{display:inline-block;white-space:nowrap;line-height:inherit}.mw-parser-output .navbar-brackets::before{margin-right:-0.125em;content:"[ "}.mw-parser-output .navbar-brackets::after{margin-left:-0.125em;content:" ]"}.mw-parser-output .navbar li{word-spacing:-0.125em}.mw-parser-output .navbar a>span,.mw-parser-output .navbar a>abbr{text-decoration:inherit}.mw-parser-output .navbar-mini abbr{font-variant:small-caps;border-bottom:none;text-decoration:none;cursor:inherit}.mw-parser-output .navbar-ct-full{font-size:114%;margin:0 7em}.mw-parser-output .navbar-ct-mini{font-size:114%;margin:0 4em}vteCommunity areas in Chicago`
+## 
+## [[6]]
+## # A tibble: 2 x 2
+##   `vteNeighborhoods in Chicago`                         vteNeighborhoods in Ch~1
+##   <chr>                                                 <chr>                   
+## 1 Recognized by the City of Chicago                     "Albany Park\nAndersonv~
+## 2 Other districts and areas recognized by the community "Altgeld Gardens\nArmou~
+## # i abbreviated name: 1: `vteNeighborhoods in Chicago`
+\end{verbatim}
+
+The ``Historical population'' table is in {[}{[}2{]}{]} of the
+table\_details list.
+
+Extract the ``Historical population'' table from the list and save it as
+another object. You can use subsetting via \texttt{{[}{[}…{]}{]}} to
+extract pieces from a list. Print the result.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Extracting the "Historical population" table from list table\_details }
+\CommentTok{\# Saving this as object pop}
+\NormalTok{pop }\OtherTok{\textless{}{-}}\NormalTok{ table\_details[[}\DecValTok{2}\NormalTok{]]}
+
+\CommentTok{\# Printing pop}
+\FunctionTok{print}\NormalTok{(pop)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 11 x 4
+##    Census Pop.    .mw-parser-output .sr-only{border:0;clip:rect(0,0,0,0)~1 `%±` 
+##    <chr>  <chr>   <chr>                                                    <chr>
+##  1 1930   87,005  ""                                                       —    
+##  2 1940   103,256 ""                                                       18.7%
+##  3 1950   114,557 ""                                                       10.9%
+##  4 1960   80,036  ""                                                       −30.~
+##  5 1970   80,166  ""                                                       0.2% 
+##  6 1980   53,741  ""                                                       −33.~
+##  7 1990   35,897  ""                                                       −33.~
+##  8 2000   28,006  ""                                                       −22.~
+##  9 2010   21,929  ""                                                       −21.~
+## 10 2020   24,589  ""                                                       12.1%
+## 11 [3][1] [3][1]  "[3][1]"                                                 [3][~
+## # i abbreviated name:
+## #   1: `.mw-parser-output .sr-only{border:0;clip:rect(0,0,0,0);clip-path:polygon(0px 0px,0px 0px,0px 0px);height:1px;margin:-1px;overflow:hidden;padding:0;position:absolute;width:1px;white-space:nowrap}Note`
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Keeping only rows and columns with actual values}
+\NormalTok{pop }\OtherTok{\textless{}{-}}\NormalTok{ pop[}\DecValTok{1}\SpecialCharTok{:}\DecValTok{10}\NormalTok{, }\SpecialCharTok{{-}}\DecValTok{3}\NormalTok{]}
+\NormalTok{pop}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 10 x 3
+##    Census Pop.    `%±`  
+##    <chr>  <chr>   <chr> 
+##  1 1930   87,005  —     
+##  2 1940   103,256 18.7% 
+##  3 1950   114,557 10.9% 
+##  4 1960   80,036  −30.1%
+##  5 1970   80,166  0.2%  
+##  6 1980   53,741  −33.0%
+##  7 1990   35,897  −33.2%
+##  8 2000   28,006  −22.0%
+##  9 2010   21,929  −21.7%
+## 10 2020   24,589  12.1%
+\end{verbatim}
+
+\hypertarget{expanding-to-more-pages}{%
+\subsection{2. Expanding to More Pages}\label{expanding-to-more-pages}}
+
+That's it for this page. However, we may want to repeat this process for
+other community areas. The Wikipedia page
+\href{https://en.wikipedia.org/wiki/Grand_Boulevard,_Chicago}{https://en.wikipedia.org/wiki/Grand\_Boulevard,\textbackslash\_Chicago}
+has a section on ``Places adjacent to Grand Boulevard, Chicago'' at the
+bottom. Can you find the corresponding table in the list of tables that
+you created earlier? Extract this table as a new object.
+
+The ``Places adjacent to Grand Boulevard, Chicago'' table is in {[}4{]}
+of the table\_details list.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Extracting "Places adjacent to Grand Boulevard, Chicago" table}
+\CommentTok{\# Assigning this table to object gb\_adj}
+\NormalTok{(gb\_adj }\OtherTok{\textless{}{-}}\NormalTok{ table\_details[[}\DecValTok{4}\NormalTok{]])}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 5 x 3
+##   X1                       X2                         X3                  
+##   <chr>                    <chr>                      <chr>               
+## 1 "Armour Square, Chicago" "Douglas, Chicago"         "Oakland, Chicago"  
+## 2 ""                       ""                         ""                  
+## 3 "Fuller Park, Chicago"   "Grand Boulevard, Chicago" "Kenwood, Chicago"  
+## 4 ""                       ""                         ""                  
+## 5 ""                       "Washington Park, Chicago" "Hyde Park, Chicago"
+\end{verbatim}
+
+Then, grab the community areas east of Grand Boulevard and save them as
+a character vector. Print the result.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Saving communities east of Grand Boulevard and removing blank characters from}
+\CommentTok{\# the character string, named east\_gb}
+\NormalTok{(east\_gb }\OtherTok{\textless{}{-}}\NormalTok{ gb\_adj}\SpecialCharTok{$}\NormalTok{X3 }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{stri\_remove\_empty\_na}\NormalTok{())}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "Oakland, Chicago"   "Kenwood, Chicago"   "Hyde Park, Chicago"
+\end{verbatim}
+
+We want to use this list to create a loop that extracts the population
+tables from the Wikipedia pages of these places. To make this work and
+build valid urls, we need to replace empty spaces in the character
+vector with underscores. This can be done with \texttt{gsub()}, or by
+hand. The resulting vector should look like this: ``Oakland,\_Chicago''
+``Kenwood,\_Chicago'' ``Hyde\_Park,\_Chicago''
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Using gsub to replace the empty spaces of the character vector east\_gb}
+\CommentTok{\# with underscores}
+\NormalTok{(east\_gb }\OtherTok{\textless{}{-}} \FunctionTok{gsub}\NormalTok{(}\StringTok{" "}\NormalTok{, }\StringTok{"\_"}\NormalTok{, east\_gb))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "Oakland,_Chicago"   "Kenwood,_Chicago"   "Hyde_Park,_Chicago"
+\end{verbatim}
+
+To prepare the loop, we also want to copy our \texttt{pop} table and
+rename it as \texttt{pops}. In the loop, we append this table by adding
+columns from the other community areas.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{pops }\OtherTok{\textless{}{-}}\NormalTok{ pop}
+\end{Highlighting}
+\end{Shaded}
+
+Build a small loop to test whether you can build valid urls using the
+vector of places and pasting each element of it after
+\texttt{https://en.wikipedia.org/wiki/} in a for loop. Calling
+\texttt{url} shows the last url of this loop, which should be
+\texttt{https://en.wikipedia.org/wiki/Hyde\_Park,\_Chicago}.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Building a small test loop}
+\ControlFlowTok{for}\NormalTok{(i }\ControlFlowTok{in}\NormalTok{ east\_gb) \{}
+\NormalTok{   url }\OtherTok{\textless{}{-}} \FunctionTok{paste0}\NormalTok{(}\StringTok{"https://en.wikipedia.org/wiki/"}\NormalTok{,i, }\AttributeTok{sep =} \StringTok{""}\NormalTok{)}
+\NormalTok{   src }\OtherTok{\textless{}{-}} \FunctionTok{read\_html}\NormalTok{(url)}
+  \FunctionTok{print}\NormalTok{(url)   \}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "https://en.wikipedia.org/wiki/Oakland,_Chicago"
+## [1] "https://en.wikipedia.org/wiki/Kenwood,_Chicago"
+## [1] "https://en.wikipedia.org/wiki/Hyde_Park,_Chicago"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{url}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "https://en.wikipedia.org/wiki/Hyde_Park,_Chicago"
+\end{verbatim}
+
+Finally, extend the loop and add the code that is needed to grab the
+population tables from each page. Add columns to the original table
+\texttt{pops} using \texttt{cbind()}.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Extending the loop}
+\ControlFlowTok{for}\NormalTok{(i }\ControlFlowTok{in}\NormalTok{ east\_gb) \{}
+\NormalTok{   url }\OtherTok{\textless{}{-}} \FunctionTok{paste0}\NormalTok{(}\StringTok{"https://en.wikipedia.org/wiki/"}\NormalTok{,i)}
+\NormalTok{   src }\OtherTok{\textless{}{-}} \FunctionTok{read\_html}\NormalTok{(url)}
+  \FunctionTok{print}\NormalTok{(url)   }
+
+\CommentTok{\# Extracting the tables from object src (using the \textasciigrave{}rvest\textasciigrave{} package) }
+\NormalTok{    nds }\OtherTok{\textless{}{-}} \FunctionTok{html\_elements}\NormalTok{(src, }\AttributeTok{xpath =} \StringTok{\textquotesingle{}//table\textquotesingle{}}\NormalTok{)}
+  
+\CommentTok{\# Using html\_table() on the nds object  }
+\NormalTok{    table\_details }\OtherTok{\textless{}{-}} \FunctionTok{html\_table}\NormalTok{(nds)}
+
+\CommentTok{\# Extracting the "Historical population" table from list table\_details }
+\CommentTok{\# Saving this as object pop}
+\NormalTok{  pop }\OtherTok{\textless{}{-}}\NormalTok{ table\_details[[}\DecValTok{2}\NormalTok{]]}
+
+\CommentTok{\# Keeping only rows and columns with actual values}
+\NormalTok{  pop }\OtherTok{\textless{}{-}}\NormalTok{ pop[}\DecValTok{1}\SpecialCharTok{:}\DecValTok{10}\NormalTok{, }\SpecialCharTok{{-}}\DecValTok{3}\NormalTok{]}
+
+\NormalTok{pops }\OtherTok{\textless{}{-}} \FunctionTok{cbind}\NormalTok{(pops, pop)}
+  
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "https://en.wikipedia.org/wiki/Oakland,_Chicago"
+## [1] "https://en.wikipedia.org/wiki/Kenwood,_Chicago"
+## [1] "https://en.wikipedia.org/wiki/Hyde_Park,_Chicago"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{pops}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##    Census    Pop.     %± Census   Pop.     %± Census   Pop.     %± Census
+## 1    1930  87,005      —   1930 14,962      —   1930 26,942      —   1930
+## 2    1940 103,256  18.7%   1940 14,500  −3.1%   1940 29,611   9.9%   1940
+## 3    1950 114,557  10.9%   1950 24,464  68.7%   1950 35,705  20.6%   1950
+## 4    1960  80,036 −30.1%   1960 24,378  −0.4%   1960 41,533  16.3%   1960
+## 5    1970  80,166   0.2%   1970 18,291 −25.0%   1970 26,890 −35.3%   1970
+## 6    1980  53,741 −33.0%   1980 16,748  −8.4%   1980 21,974 −18.3%   1980
+## 7    1990  35,897 −33.2%   1990  8,197 −51.1%   1990 18,178 −17.3%   1990
+## 8    2000  28,006 −22.0%   2000  6,110 −25.5%   2000 18,363   1.0%   2000
+## 9    2010  21,929 −21.7%   2010  5,918  −3.1%   2010 17,841  −2.8%   2010
+## 10   2020  24,589  12.1%   2020  6,799  14.9%   2020 19,116   7.1%   2020
+##      Pop.     %±
+## 1  48,017      —
+## 2  50,550   5.3%
+## 3  55,206   9.2%
+## 4  45,577 −17.4%
+## 5  33,531 −26.4%
+## 6  31,198  −7.0%
+## 7  28,630  −8.2%
+## 8  29,920   4.5%
+## 9  25,681 −14.2%
+## 10 29,456  14.7%
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{str}\NormalTok{(pops)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 'data.frame':    10 obs. of  12 variables:
+##  $ Census: chr  "1930" "1940" "1950" "1960" ...
+##  $ Pop.  : chr  "87,005" "103,256" "114,557" "80,036" ...
+##  $ %±    : chr  "—" "18.7%" "10.9%" "−30.1%" ...
+##  $ Census: chr  "1930" "1940" "1950" "1960" ...
+##  $ Pop.  : chr  "14,962" "14,500" "24,464" "24,378" ...
+##  $ %±    : chr  "—" "−3.1%" "68.7%" "−0.4%" ...
+##  $ Census: chr  "1930" "1940" "1950" "1960" ...
+##  $ Pop.  : chr  "26,942" "29,611" "35,705" "41,533" ...
+##  $ %±    : chr  "—" "9.9%" "20.6%" "16.3%" ...
+##  $ Census: chr  "1930" "1940" "1950" "1960" ...
+##  $ Pop.  : chr  "48,017" "50,550" "55,206" "45,577" ...
+##  $ %±    : chr  "—" "5.3%" "9.2%" "−17.4%" ...
+\end{verbatim}
+
+\hypertarget{scraping-and-analyzing-text-data}{%
+\subsection{3. Scraping and Analyzing Text
+Data}\label{scraping-and-analyzing-text-data}}
+
+Suppose we wanted to take the actual text from the Wikipedia pages
+instead of just the information in the table. Our goal in this section
+is to extract the text from the body of the pages, then do some basic
+text cleaning and analysis.
+
+First, scrape just the text without any of the information in the
+margins or headers. For example, for ``Grand Boulevard'', the text
+should start with, ``\textbf{Grand Boulevard} on the
+\href{https://en.wikipedia.org/wiki/South_Side,_Chicago}{South Side} of
+\href{https://en.wikipedia.org/wiki/Chicago}{Chicago},
+\href{https://en.wikipedia.org/wiki/Illinois}{Illinois}, is one of the
+\ldots{}''.
+
+\hypertarget{creating-a-corpus}{%
+\subsubsection{(1) Creating a corpus}\label{creating-a-corpus}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Extracting desired text elements from webpage}
+\NormalTok{nds\_text }\OtherTok{\textless{}{-}} \FunctionTok{html\_elements}\NormalTok{(url\_gb, }\AttributeTok{xpath =} \StringTok{"//p"}\NormalTok{)}
+\FunctionTok{str}\NormalTok{(nds\_text)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## List of 8
+##  $ :List of 2
+##   ..$ node:<externalptr> 
+##   ..$ doc :<externalptr> 
+##   ..- attr(*, "class")= chr "xml_node"
+##  $ :List of 2
+##   ..$ node:<externalptr> 
+##   ..$ doc :<externalptr> 
+##   ..- attr(*, "class")= chr "xml_node"
+##  $ :List of 2
+##   ..$ node:<externalptr> 
+##   ..$ doc :<externalptr> 
+##   ..- attr(*, "class")= chr "xml_node"
+##  $ :List of 2
+##   ..$ node:<externalptr> 
+##   ..$ doc :<externalptr> 
+##   ..- attr(*, "class")= chr "xml_node"
+##  $ :List of 2
+##   ..$ node:<externalptr> 
+##   ..$ doc :<externalptr> 
+##   ..- attr(*, "class")= chr "xml_node"
+##  $ :List of 2
+##   ..$ node:<externalptr> 
+##   ..$ doc :<externalptr> 
+##   ..- attr(*, "class")= chr "xml_node"
+##  $ :List of 2
+##   ..$ node:<externalptr> 
+##   ..$ doc :<externalptr> 
+##   ..- attr(*, "class")= chr "xml_node"
+##  $ :List of 2
+##   ..$ node:<externalptr> 
+##   ..$ doc :<externalptr> 
+##   ..- attr(*, "class")= chr "xml_node"
+##  - attr(*, "class")= chr "xml_nodeset"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Reading html text}
+\NormalTok{(description }\OtherTok{\textless{}{-}} \FunctionTok{html\_text}\NormalTok{(nds\_text))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "\n"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
+## [2] "Grand Boulevard on the South Side of Chicago, Illinois, is one of the city's Community Areas. The boulevard from which it takes its name is now Martin Luther King Jr. Drive. The area is bounded by 39th to the north, 51st Street to the south, Cottage Grove Avenue to the east, and the Chicago, Rock Island & Pacific Railroad tracks to the west.\n"                                                                                                                                                                                          
+## [3] "This is one of the two community areas that encompass the Bronzeville neighborhood, with the other being Douglas. Grand Boulevard also includes the Washington Park Court District neighborhood that was declared a Chicago Landmark on October 2, 1991.[2]"                                                                                                                                                                                                                                                                                        
+## [4] "The Harold Washington Cultural Center is one of its newer and more famous buildings. It arose on the site that from the 1920s through the 1970s housed a famous center of African American cultural life, the Regal Theater. Among the other notable properties in this neighborhood are the Daniel Hale Williams House, the Robert S. Abbott House, and the Oscar Stanton De Priest House.\n"                                                                                                                                                      
+## [5] "According to a 2018 US Census American Community Survey, there were 22,784 people and 10,383 households in Grand Boulevard.[1] The racial makeup of the area was 92.56% African American, 2.70% White, 0.70% Asian, and 2.26% from other races. Hispanic or Latino residents of any race were 1.77% of the population.[1] In the area, the population was spread out, with 27.3% under the age of 19, 19.4% from 20 to 34, 22.6% from 35 to 49, 16.4% from 50 to 64, and 14.3% who were 65 years of age or older. The median age was 36.9 years.[1]"
+## [6] "Grand Boulevard is part of City of Chicago School District #299 and City Colleges of Chicago District #508. The nearest City Colleges campus was Kennedy–King College in Englewood. A high school diploma had been earned by 85.5% of Grand Boulevard residents and a bachelor's degree or greater had been earned by 31.31% of residents compared to citywide figures of 82.3% and 35.6% respectively.[1]"                                                                                                                                         
+## [7] "The Chicago Transit Authority operates the Chicago \"L\" system in the Grand Boulevard community area. The Green Line provides rapid transit at four stations: Indiana, 43rd Street, 47th Street and 51st Street stations.\n"                                                                                                                                                                                                                                                                                                                       
+## [8] "The Grand Boulevard community area has supported the Democratic Party in the past two presidential elections by overwhelming margins. In the 2016 presidential election, Grand Boulevard cast 10,081 votes for Hillary Clinton and cast 171 votes for Donald Trump.[4] In the 2012 presidential election, Grand Boulevard cast 10,646 votes for Barack Obama and cast 81 votes for Mitt Romney.[5]"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Making sure all of the text is in one block}
+\NormalTok{(description }\OtherTok{\textless{}{-}}\NormalTok{ description }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{paste}\NormalTok{(}\AttributeTok{collapse =} \StringTok{\textquotesingle{} \textquotesingle{}}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "\n Grand Boulevard on the South Side of Chicago, Illinois, is one of the city's Community Areas. The boulevard from which it takes its name is now Martin Luther King Jr. Drive. The area is bounded by 39th to the north, 51st Street to the south, Cottage Grove Avenue to the east, and the Chicago, Rock Island & Pacific Railroad tracks to the west.\n This is one of the two community areas that encompass the Bronzeville neighborhood, with the other being Douglas. Grand Boulevard also includes the Washington Park Court District neighborhood that was declared a Chicago Landmark on October 2, 1991.[2] The Harold Washington Cultural Center is one of its newer and more famous buildings. It arose on the site that from the 1920s through the 1970s housed a famous center of African American cultural life, the Regal Theater. Among the other notable properties in this neighborhood are the Daniel Hale Williams House, the Robert S. Abbott House, and the Oscar Stanton De Priest House.\n According to a 2018 US Census American Community Survey, there were 22,784 people and 10,383 households in Grand Boulevard.[1] The racial makeup of the area was 92.56% African American, 2.70% White, 0.70% Asian, and 2.26% from other races. Hispanic or Latino residents of any race were 1.77% of the population.[1] In the area, the population was spread out, with 27.3% under the age of 19, 19.4% from 20 to 34, 22.6% from 35 to 49, 16.4% from 50 to 64, and 14.3% who were 65 years of age or older. The median age was 36.9 years.[1] Grand Boulevard is part of City of Chicago School District #299 and City Colleges of Chicago District #508. The nearest City Colleges campus was Kennedy–King College in Englewood. A high school diploma had been earned by 85.5% of Grand Boulevard residents and a bachelor's degree or greater had been earned by 31.31% of residents compared to citywide figures of 82.3% and 35.6% respectively.[1] The Chicago Transit Authority operates the Chicago \"L\" system in the Grand Boulevard community area. The Green Line provides rapid transit at four stations: Indiana, 43rd Street, 47th Street and 51st Street stations.\n The Grand Boulevard community area has supported the Democratic Party in the past two presidential elections by overwhelming margins. In the 2016 presidential election, Grand Boulevard cast 10,081 votes for Hillary Clinton and cast 171 votes for Donald Trump.[4] In the 2012 presidential election, Grand Boulevard cast 10,646 votes for Barack Obama and cast 81 votes for Mitt Romney.[5]"
+\end{verbatim}
+
+\hypertarget{grab-the-descriptions-of-the-various-communities-areas-using-for-loop}{%
+\subsubsection{(2) Grab the descriptions of the various communities
+areas using for
+loop}\label{grab-the-descriptions-of-the-various-communities-areas-using-for-loop}}
+
+Using a similar loop as in the last section, grab the descriptions of
+the various communities areas. Make a tibble with two columns: the name
+of the location and the text describing the location.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Making a copy of description to prepare the loop}
+\NormalTok{descriptions }\OtherTok{\textless{}{-}}\NormalTok{ description}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Using a similar loop to grab descriptions of the eastern community areas}
+\ControlFlowTok{for}\NormalTok{(i }\ControlFlowTok{in}\NormalTok{ east\_gb) \{}
+\NormalTok{   url }\OtherTok{\textless{}{-}} \FunctionTok{paste0}\NormalTok{(}\StringTok{"https://en.wikipedia.org/wiki/"}\NormalTok{,i)}
+\NormalTok{   src }\OtherTok{\textless{}{-}} \FunctionTok{read\_html}\NormalTok{(url)}
+  \FunctionTok{print}\NormalTok{(url)   }
+
+ \CommentTok{\# Text source}
+\NormalTok{  nds\_text\_src }\OtherTok{\textless{}{-}} \FunctionTok{html\_elements}\NormalTok{(src, }\AttributeTok{xpath =} \StringTok{"//p"}\NormalTok{)}
+
+\CommentTok{\# Extracting the tables from object nds\_text\_src }
+\NormalTok{description }\OtherTok{\textless{}{-}} \FunctionTok{html\_text}\NormalTok{(nds\_text\_src)}
+
+\CommentTok{\# Make sure all of the text is in one block}
+\NormalTok{description }\OtherTok{\textless{}{-}}\NormalTok{ description }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{paste}\NormalTok{(}\AttributeTok{collapse =} \StringTok{\textquotesingle{} \textquotesingle{}}\NormalTok{)}
+
+\NormalTok{descriptions }\OtherTok{\textless{}{-}} \FunctionTok{rbind}\NormalTok{(descriptions, description)}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "https://en.wikipedia.org/wiki/Oakland,_Chicago"
+## [1] "https://en.wikipedia.org/wiki/Kenwood,_Chicago"
+## [1] "https://en.wikipedia.org/wiki/Hyde_Park,_Chicago"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Viewing output}
+\FunctionTok{str}\NormalTok{(descriptions)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##  chr [1:4, 1] "\n Grand Boulevard on the South Side of Chicago, Illinois, is one of the city's Community Areas. The boulevard "| __truncated__ ...
+##  - attr(*, "dimnames")=List of 2
+##   ..$ : chr [1:4] "descriptions" "description" "description" "description"
+##   ..$ : NULL
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Making a tibble with two columns: the name of the location and }
+\CommentTok{\# the text describing the location.}
+\NormalTok{descriptions\_df }\OtherTok{\textless{}{-}} \FunctionTok{as.tibble}\NormalTok{(descriptions)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: `as.tibble()` was deprecated in tibble 2.0.0.
+## i Please use `as_tibble()` instead.
+## i The signature and semantics have changed, see `?as_tibble`.
+## This warning is displayed once every 8 hours.
+## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+## generated.
+\end{verbatim}
+
+\begin{verbatim}
+## Warning: The `x` argument of `as_tibble.matrix()` must have unique column names if
+## `.name_repair` is omitted as of tibble 2.0.0.
+## i Using compatibility `.name_repair`.
+## i The deprecated feature was likely used in the tibble package.
+##   Please report the issue at <https://github.com/tidyverse/tibble/issues>.
+## This warning is displayed once every 8 hours.
+## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+## generated.
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{chi\_neighborhood }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}
+  \StringTok{"neighborhood"} \OtherTok{=} \FunctionTok{c}\NormalTok{(}\StringTok{"Grand Boulevard"}\NormalTok{,}\StringTok{"Oakland"}\NormalTok{, }\StringTok{"Kenwood"}\NormalTok{,}\StringTok{"Hyde Park"}\NormalTok{),}
+  \StringTok{"description\_text"} \OtherTok{=}\NormalTok{ descriptions\_df}\SpecialCharTok{$}\NormalTok{V1)}
+
+\NormalTok{chi\_neighborhood }\OtherTok{\textless{}{-}} \FunctionTok{as.tibble}\NormalTok{(chi\_neighborhood)}
+\FunctionTok{head}\NormalTok{(chi\_neighborhood)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 4 x 2
+##   neighborhood    description_text                                              
+##   <chr>           <chr>                                                         
+## 1 Grand Boulevard "\n Grand Boulevard on the South Side of Chicago, Illinois, i~
+## 2 Oakland         "Oakland, located on the South Side of Chicago, Illinois, USA~
+## 3 Kenwood         "\n Kenwood, one of Chicago's 77 community areas, is on the s~
+## 4 Hyde Park       "\n Hyde Park is the 41st of the 77 community areas of Chicag~
+\end{verbatim}
+
+\hypertarget{create-tokens-using-unnest-tokens.-make-sure-the-data-is-in-one-token-per-row-format.-remove-any-stop-words-within-the-data.-what-are-the-most-common-words-used-overall}{%
+\subsubsection{(3) Create tokens using unnest tokens. Make sure the data
+is in one token per row format. Remove any stop words within the data.
+What are the most common words used
+overall?}\label{create-tokens-using-unnest-tokens.-make-sure-the-data-is-in-one-token-per-row-format.-remove-any-stop-words-within-the-data.-what-are-the-most-common-words-used-overall}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Creating tokens using unnest\_tokens}
+\NormalTok{chi\_tokens }\OtherTok{\textless{}{-}}\NormalTok{ chi\_neighborhood }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{unnest\_tokens}\NormalTok{(word, description\_text)}
+
+\CommentTok{\# Making sure the data is in one token per row format}
+\FunctionTok{head}\NormalTok{(chi\_tokens)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 6 x 2
+##   neighborhood    word     
+##   <chr>           <chr>    
+## 1 Grand Boulevard grand    
+## 2 Grand Boulevard boulevard
+## 3 Grand Boulevard on       
+## 4 Grand Boulevard the      
+## 5 Grand Boulevard south    
+## 6 Grand Boulevard side
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Removing stop words}
+\FunctionTok{data}\NormalTok{(}\StringTok{"stop\_words"}\NormalTok{)}
+\NormalTok{chi\_tokens }\OtherTok{\textless{}{-}}\NormalTok{ chi\_tokens }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{anti\_join}\NormalTok{(stop\_words)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Joining with `by = join_by(word)`
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{head}\NormalTok{(chi\_tokens)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 6 x 2
+##   neighborhood    word     
+##   <chr>           <chr>    
+## 1 Grand Boulevard grand    
+## 2 Grand Boulevard boulevard
+## 3 Grand Boulevard south    
+## 4 Grand Boulevard chicago  
+## 5 Grand Boulevard illinois 
+## 6 Grand Boulevard city's
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Count the most common words used overall}
+\NormalTok{token\_count }\OtherTok{\textless{}{-}}\NormalTok{ chi\_tokens }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{count}\NormalTok{(word, }\AttributeTok{sort =} \ConstantTok{TRUE}\NormalTok{)}
+\FunctionTok{head}\NormalTok{(token\_count)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 6 x 2
+##   word          n
+##   <chr>     <int>
+## 1 park         89
+## 2 hyde         75
+## 3 chicago      57
+## 4 street       44
+## 5 kenwood      38
+## 6 community    28
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Plot the most common words used overall}
+\NormalTok{token\_count }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{filter}\NormalTok{(n }\SpecialCharTok{\textgreater{}} \DecValTok{20}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{word =} \FunctionTok{reorder}\NormalTok{(word, n)) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{ggplot}\NormalTok{(}\FunctionTok{aes}\NormalTok{(n, word)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_col}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{x =} \StringTok{"Frequency Used"}\NormalTok{, }\AttributeTok{y =} \ConstantTok{NULL}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Cho_Lamoreaux_Assignment-3_files/figure-latex/unnamed-chunk-21-1.pdf}
+
+Upon removing stop words, the most common words used overall are:
+``park'' (n=89), ``hyde'' (n=75), and ``chicago'' (n=57).
+
+\hypertarget{plot-the-most-common-words-within-each-location.-what-are-some-of-the-similarities-between-the-locations-what-are-some-of-the-differences}{%
+\subsubsection{(4) Plot the most common words within each location. What
+are some of the similarities between the locations? What are some of the
+differences?}\label{plot-the-most-common-words-within-each-location.-what-are-some-of-the-similarities-between-the-locations-what-are-some-of-the-differences}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{(grouped\_tokens }\OtherTok{\textless{}{-}}\NormalTok{ chi\_tokens }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{group\_by}\NormalTok{(neighborhood)}\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{count}\NormalTok{(word, }\AttributeTok{sort =} \ConstantTok{TRUE}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 1,498 x 3
+## # Groups:   neighborhood [4]
+##    neighborhood word           n
+##    <chr>        <chr>      <int>
+##  1 Hyde Park    park          77
+##  2 Hyde Park    hyde          69
+##  3 Hyde Park    chicago       34
+##  4 Hyde Park    street        28
+##  5 Kenwood      kenwood       25
+##  6 Oakland      oakland       25
+##  7 Hyde Park    university    18
+##  8 Hyde Park    house         15
+##  9 Hyde Park    south         13
+## 10 Hyde Park    55th          11
+## # i 1,488 more rows
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# plot for the most common words within Grand Boulevard}
+\NormalTok{token\_Grand\_Boulevard }\OtherTok{\textless{}{-}}\NormalTok{ grouped\_tokens }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{filter}\NormalTok{(neighborhood }\SpecialCharTok{==} \StringTok{"Grand Boulevard"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{slice}\NormalTok{(}\DecValTok{1}\SpecialCharTok{:}\DecValTok{6}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{word =} \FunctionTok{reorder}\NormalTok{(word, n)) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{ggplot}\NormalTok{(}\FunctionTok{aes}\NormalTok{(n, word)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_col}\NormalTok{(}\AttributeTok{fill=}\StringTok{"gold"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \StringTok{"Grand Boulevard Description"}\NormalTok{, }\AttributeTok{x =} \StringTok{"Frequency Used"}\NormalTok{, }\AttributeTok{y =} \ConstantTok{NULL}\NormalTok{)}
+
+\CommentTok{\# plot for the most common words within Oakland}
+\NormalTok{token\_Oakland }\OtherTok{\textless{}{-}}\NormalTok{ grouped\_tokens }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{filter}\NormalTok{(neighborhood }\SpecialCharTok{==} \StringTok{"Oakland"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{slice}\NormalTok{(}\DecValTok{1}\SpecialCharTok{:}\DecValTok{6}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{word =} \FunctionTok{reorder}\NormalTok{(word, n)) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{ggplot}\NormalTok{(}\FunctionTok{aes}\NormalTok{(n, word)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_col}\NormalTok{(}\AttributeTok{fill=}\StringTok{"orchid"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \StringTok{"Oakland Description"}\NormalTok{, }\AttributeTok{x =} \StringTok{"Frequency Used"}\NormalTok{, }\AttributeTok{y =} \ConstantTok{NULL}\NormalTok{)}
+
+\CommentTok{\# plot for the most common words within Kenwood}
+\NormalTok{token\_Kenwood }\OtherTok{\textless{}{-}}\NormalTok{ grouped\_tokens }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{filter}\NormalTok{(neighborhood }\SpecialCharTok{==} \StringTok{"Kenwood"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{slice}\NormalTok{(}\DecValTok{1}\SpecialCharTok{:}\DecValTok{6}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{word =} \FunctionTok{reorder}\NormalTok{(word, n)) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{ggplot}\NormalTok{(}\FunctionTok{aes}\NormalTok{(n, word)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_col}\NormalTok{(}\AttributeTok{fill=}\StringTok{"royalblue"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \StringTok{"Kenwood Description"}\NormalTok{, }\AttributeTok{x =} \StringTok{"Frequency Used"}\NormalTok{, }\AttributeTok{y =} \ConstantTok{NULL}\NormalTok{)}
+
+\CommentTok{\# plot for the most common words within Hyde\_Park}
+\NormalTok{token\_Hyde\_Park }\OtherTok{\textless{}{-}}\NormalTok{ grouped\_tokens }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{filter}\NormalTok{(neighborhood }\SpecialCharTok{==} \StringTok{"Hyde Park"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{slice}\NormalTok{(}\DecValTok{1}\SpecialCharTok{:}\DecValTok{6}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{word =} \FunctionTok{reorder}\NormalTok{(word, n)) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{ggplot}\NormalTok{(}\FunctionTok{aes}\NormalTok{(n, word)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_col}\NormalTok{(}\AttributeTok{fill=}\StringTok{"seagreen"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \StringTok{"Hyde Park Description"}\NormalTok{, }\AttributeTok{x =} \StringTok{"Frequency Used"}\NormalTok{, }\AttributeTok{y =} \ConstantTok{NULL}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# plots}
+\NormalTok{token\_Grand\_Boulevard}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Cho_Lamoreaux_Assignment-3_files/figure-latex/unnamed-chunk-24-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{token\_Oakland}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Cho_Lamoreaux_Assignment-3_files/figure-latex/unnamed-chunk-24-2.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{token\_Kenwood}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Cho_Lamoreaux_Assignment-3_files/figure-latex/unnamed-chunk-24-3.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{token\_Hyde\_Park}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Cho_Lamoreaux_Assignment-3_files/figure-latex/unnamed-chunk-24-4.pdf}
+
+The most common words used in the Grand Boulevard description are:
+``boulevard'', ``grand'', and ``chicago''.
+
+The most common words used in the Oakland description are: ``oakland'',
+``chicago'', and ``housing''.
+
+The most common words used in the Kenwood description are: ``kenwood'',
+``school'', and ``park''.
+
+The most common words used in the Hyde Park description are: ``park'',
+``hyde'', and ``chicago''.
+
+All of the neighborhood descriptions had parts of each respective
+neighborhood name as some of their top used words. Unsurprisingly,
+``chicago'' was in the top 6 words used in all of the neighborhoods.
+Neighborhoods also featured words that reflected what was in them. For
+instance the Hyde Park neighborhood description had ``university'' as
+its fifth most frequently used word, which makes sense as Hyde Park is
+home to the University of Chicago.
+
+Hyde Park in contrast to the other neighborhoods, had much higher
+frequencies of words used, with all six most frequently used words
+having usages above 10. All the other neighborhoods only had their top
+word used at or over 10 times. This is likely because the Hyde Park
+article has the longest description out of these four neighborhoods.
+
+\end{document}
