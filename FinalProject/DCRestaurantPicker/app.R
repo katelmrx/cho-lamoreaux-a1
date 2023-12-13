@@ -33,16 +33,39 @@ icons <- awesomeIcons(
 ui <- fluidPage(
   leafletOutput("testmap"),
   p(),
-  actionButton("recalc", "Pick for me!")
+  actionButton("randomPointButton", "Pick for me!"),
+  actionButton("refreshButton", "Refresh the map")
 )
 
 server <- function(input, output, session) {
   
+  # Original data
+  originalData <- reactiveVal(restaurants_list)
+  
+  # Render the map
   output$testmap <- renderLeaflet({
-    testmap <- leaflet(data = restaurants_list) %>%
-      addProviderTiles(providers$CartoDB.Positron) %>%  # Add default OpenStreetMap map tiles 
+    testmap <- leaflet(data = originalData()) %>%
+      addProviderTiles(providers$CartoDB.Positron) %>%
       addAwesomeMarkers(lng = ~longitude, lat = ~latitude, icon=icons, popup = ~as.character(name), label = ~as.character(name))
   })
+  
+  # Random point button event
+  observeEvent(input$randomPointButton, {
+    randomIndex <- sample(1:nrow(originalData()), 1)
+    randomPoint <- originalData()[randomIndex, c("latitude", "longitude", "name")]
+    
+    leafletProxy("testmap") %>%
+      clearMarkers() %>%
+      addAwesomeMarkers(lng = randomPoint$longitude, lat = randomPoint$latitude, icon = icons, popup = randomPoint$name, label = randomPoint$name)
+  })
+  
+  # Refresh button event
+  observeEvent(input$refreshButton, {
+    leafletProxy("testmap") %>%
+      clearMarkers() %>%
+      addAwesomeMarkers(lng = ~longitude, lat = ~latitude, icon=icons, popup = ~as.character(name), label = ~as.character(name))
+  })
+  
 }
 
 shinyApp(ui, server)
