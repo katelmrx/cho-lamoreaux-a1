@@ -14,7 +14,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Libraries
 
-#Feedback from Brian: How do we optimize restaurant choices? Building an interactive tool. MAke sure you have a clear goal in mind. RQ = can be goal we have in mind.
+#Feedback from Brian: How do we optimize restaurant choices? Building an interactive tool. Make sure you have a clear goal in mind. RQ = can be goal we have in mind.
 
 Ideas: could link `$$$$` ratings/star ratings/mapdata/website from google, star ratings from yelp (use yelp api; scraping is illegal).
 
@@ -238,8 +238,8 @@ head(restaurants)
 # export dataset for manual cleaning
 # write.xlsx(restaurants, "/Users/sungjoocho/Desktop/UMD/Fall2023/SURV727/Group_assignment/cho-lamoreaux-a1/FinalProject/restaurants.xlsx")
 
-# load manually cleaned data (final dataset)
-restaurants <- read_excel("restaurants.xlsx")
+# load manually cleaned data (added ID, top25_wm, rating_avg, price_avg)
+# restaurants <- read_excel("restaurants_cleaned.xlsx")
 head(restaurants)
 ```
 
@@ -248,27 +248,28 @@ head(restaurants)
 par(mfrow=c(2,2))
 
 # histogram of rating
-hist(restaurants$rating, 
+cleaned_data_rating <- restaurants[!is.na(restaurants$rating_avg), ]
+hist(cleaned_data_rating$rating_avg, 
      main="Histogram of Ratings", 
-     xlab="Rating", 
-     col="lightblue",
-     na.rm = TRUE)
+     xlab="Yelp and Google Average Rating", 
+     col="lightblue")
 
 # histogram of price
-hist(restaurants$price_level, 
+cleaned_data_price <- restaurants[!is.na(restaurants$price_avg), ]
+hist(cleaned_data_price$price_avg, 
      main="Histogram of Price Level", 
-     xlab="Price Level",
+     xlab="Yelp and Google Average Price Level",
      breaks = c(0.5, 1.5, 2.5, 3.5, 4.5),
      xlim = c(0, 5),
-     col="lightblue",
-     na.rm = TRUE)
+     col="lightblue")
 
 # rating and price level grouped by genre
 rest_group <- restaurants %>%
   group_by(genre) %>%
   summarise(
-    mean_rating = round(mean(rating, na.rm = TRUE), 3),
-    mean_price = round(mean(price_level, na.rm = TRUE), 3)
+    mean_rating = round(mean(rating_avg, na.rm = TRUE), 3),
+    mean_price = round(mean(price_avg, na.rm = TRUE), 3),
+    genre_count = n()  # Add this line to count the occurrences of each genre
   ) %>%
   na.omit() %>%
   arrange(desc(mean_rating))
@@ -279,10 +280,38 @@ kable(rest_group, caption = "Rating and Price by Genre")
 
 ## 6. Writing a Function
 ```{r}
-# function
-filter_restaurants <- function(genre, rating, price_level){
+find_restaurants <- function(genre = NULL, rating = NULL, price_level = NULL, top25_wm = NULL) {
   
+  # use a copy of the original dataset
+  result <- restaurants
+  
+  # filter based on genre
+  if (!is.null(genre)) {
+    result <- result[result$genre == genre, ]
+  }
+  
+  # filter based on rating
+  if (!is.null(rating)) {
+    result <- result[result$rating_avg >= rating, ]
+  }
+  
+  # filter based on price_level
+  if (!is.null(price_level)) {
+    result <- result[result$price_avg == price_level, ]
+  }
+  
+  # filter based on top25_wm
+  if (!is.null(top25_wm)) {
+    result <- result[result$top25_wm == top25_wm, ]
+  }
+  
+  result <- result %>% filter(!is.na(name))
+  return(result)
 }
+
+# example usage:
+filtered_restaurants <- find_restaurants(genre="Italian", rating=3, price_level=4, top25_wm=1)
+filtered_restaurants 
 ```
 
 
