@@ -57,7 +57,7 @@ find_restaurants <- function(genre = NULL, rating = NULL, price_level = NULL, to
     result <- result[result$top25_wm == top25_wm, ]
   }
   
-  result <- result %>% filter(!is.na(result$name))
+  #result <- result %>% filter(!is.na(restaurants$name))
   return(result)
 }
 
@@ -73,10 +73,10 @@ ui <- fluidPage(
   p(),
   actionButton("randomPointButton", "Pick for me!"),
   actionButton("refreshButton", "Refresh the map"),
-  textInput("userInputGenre", "Enter Type of Food"),
-  numericInput("numRating", "Rating", value = 1, min = 1),
-  numericInput("numPrice", "Price-level", value = 1, min = 1),
-  numericInput("numtop25", "Type 1 if you want a Top 25 Washingtonian Magazine Restaurant, otherwise type 0", value = 1, min = 0),
+  textInput("userInputGenre", "Enter Type of Food", value = ""),
+  numericInput("numRating", "Star Rating", value = NA),
+  numericInput("numPrice", "Price-level (Enter 1-4)", value = NA),
+  numericInput("numtop25", "Type 1 if you want a Top 25 Washingtonian Magazine Restaurant, otherwise type 0", value = NA),
   actionButton("userInputButton", "What's my match?")
 )
 
