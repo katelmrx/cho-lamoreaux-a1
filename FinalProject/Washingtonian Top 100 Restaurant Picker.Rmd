@@ -282,25 +282,25 @@ kable(rest_group, caption = "Rating and Price by Genre")
 ```{r}
 find_restaurants <- function(genre = NULL, rating = NULL, price_level = NULL, top25_wm = NULL) {
   
-  # Use a copy of the original dataset
+  # use a copy of the original dataset
   result <- restaurants
   
-  # Filter based on genre
+  # filter based on genre
   if (!is.null(genre)) {
     result <- result[result$genre == genre, ]
   }
   
-  # Filter based on rating
+  # filter based on rating
   if (!is.null(rating)) {
     result <- result[result$rating_avg >= rating, ]
   }
   
-  # Filter based on price_level
+  # filter based on price_level
   if (!is.null(price_level)) {
     result <- result[result$price_avg == price_level, ]
   }
   
-  # Filter based on top25_wm
+  # filter based on top25_wm
   if (!is.null(top25_wm)) {
     result <- result[result$top25_wm == top25_wm, ]
   }
@@ -309,7 +309,7 @@ find_restaurants <- function(genre = NULL, rating = NULL, price_level = NULL, to
   return(result)
 }
 
-# Example usage:
+# example usage:
 filtered_restaurants <- find_restaurants(genre="Italian", rating=3, price_level=4, top25_wm=1)
 filtered_restaurants 
 ```
