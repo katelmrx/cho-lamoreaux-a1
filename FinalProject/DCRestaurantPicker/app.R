@@ -37,7 +37,7 @@ ui <- fluidPage(
   actionButton("refreshButton", "Refresh the map")
 )
 
-server <- function(input, output, session) {
+server <- function(input, output) {
   
   # Original data
   originalData <- reactiveVal(restaurants_list)
@@ -63,7 +63,14 @@ server <- function(input, output, session) {
   observeEvent(input$refreshButton, {
     leafletProxy("testmap") %>%
       clearMarkers() %>%
-      addAwesomeMarkers(lng = ~longitude, lat = ~latitude, icon=icons, popup = ~as.character(name), label = ~as.character(name))
+      addAwesomeMarkers(data = originalData(), lng = ~longitude, lat = ~latitude, icon=icons, popup = ~as.character(name), label = ~as.character(name))
+  })
+  
+  # Ensure that the map is initially drawn with the original data
+  observe({
+    leafletProxy("testmap") %>%
+      clearMarkers() %>%
+      addAwesomeMarkers(data = originalData(), lng = ~longitude, lat = ~latitude, icon=icons, popup = ~as.character(name), label = ~as.character(name))
   })
   
 }
