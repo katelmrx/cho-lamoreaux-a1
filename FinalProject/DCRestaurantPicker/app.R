@@ -11,27 +11,24 @@ library(shiny)
 
 library(leaflet)
 
-# Define server logic required to draw a histogram
-#server <- function(input, output) {
+library(readxl)
 
-#    output$distPlot <- renderPlot({
-        # generate bins based on input$bins from ui.R
-      #  x    <- faithful[, 2]
-       # bins <- seq(min(x), max(x), length.out = input$bins + 1)
+restaurants_list <- read_excel("/cloud/project/FinalProject/restaurants_cleaned.xlsx")
 
-        # draw the histogram with the specified number of bins
-        #hist(x, breaks = bins, col = 'darkgray', border = 'white',
-         #    xlab = 'Waiting time to next eruption (in mins)',
-          #   main = 'Histogram of waiting times')
-  #  })
-#} 
+getColor <- function(restaurants_list) {
+  sapply(restaurants_list$top25_wm, function(top25_wm) {
+    if(top25_wm == 1) {
+      "red"
+    } else {
+      "blue"
+    } })
+}
 
-# Run the application 
-#shinyApp(ui = ui, server = server)
+icons <- awesomeIcons(
+  icon = 'cutlery',
+  markerColor = getColor(restaurants_list)
+)
 
-
-r_colors <- rgb(t(col2rgb(colors()) / 255))
-names(r_colors) <- colors()
 
 ui <- fluidPage(
   leafletOutput("testmap"),
@@ -41,21 +38,10 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
   
-  points <- eventReactive(input$recalc, {
-    cbind(rnorm(40) * 2 + 13, rnorm(40) + 48)
-  }, ignoreNULL = FALSE)
-  
-  content <- paste(sep = "<br/>",
-                   "<b><a href='https://thedabney.com/'>1. The Dabney</a></b>",
-                   "122 Blagden Alley, NW",
-                   "Washington, DC 20001"
-  )
   output$testmap <- renderLeaflet({
-    testmap <- leaflet() %>%
-      addTiles() %>%  # Add default OpenStreetMap map tiles
-      addPopups(-77.02455,38.91130, content,
-                options = popupOptions(closeButton = FALSE)
-      )
+    testmap <- leaflet(data = restaurants_list) %>%
+      addProviderTiles(providers$CartoDB.Positron) %>%  # Add default OpenStreetMap map tiles 
+      addAwesomeMarkers(lng = ~longitude, lat = ~latitude, icon=icons, popup = ~as.character(name), label = ~as.character(name))
   })
 }
 
