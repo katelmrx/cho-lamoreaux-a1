@@ -115,14 +115,33 @@ server <- function(input, output) {
     numRating <- input$numRating
     numPrice <- input$numPrice
     numtop25 <- input$numtop25
-
+    
+    if (length(inputNames) > 0) {
     selectedRestaurants <- find_restaurants(inputNames, numRating, numPrice, numtop25)
     
-    leafletProxy("testmap") %>%
-      clearMarkers() %>%
-      addAwesomeMarkers(data = selectedRestaurants, lng = selectedRestaurants$longitude, lat = selectedRestaurants$latitude, icon = icons, popup = selectedRestaurants$name, label = selectedRestaurants$name)
-  })
-  
+
+   if (nrow(selectedRestaurants) > 0) {
+      leafletProxy("testmap") %>%
+        clearMarkers() %>%
+       addAwesomeMarkers(data = selectedRestaurants, lng = selectedRestaurants$longitude, lat = selectedRestaurants$latitude, icon = icons, popup = selectedRestaurants$name, label = selectedRestaurants$name)
+    } else {
+      showModal(modalDialog(
+        title = "Error",
+        "No restaurants chosen. Please enter alternate specifications.",
+        easyClose = TRUE,
+        footer = NULL
+      ))
+    }
+    } else {
+      showModal(modalDialog(
+        title = "Error",
+        "Please enter genre and specifications.",
+        easyClose = TRUE,
+        footer = NULL
+      ))
+    }
+    })
+    
   
   # Ensure that the map is initially drawn with the original data
   observe({
