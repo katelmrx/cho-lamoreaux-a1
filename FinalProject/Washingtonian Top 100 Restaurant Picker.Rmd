@@ -13,7 +13,11 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ### GitHub Repository: <https://github.com/katelmrx/cho-lamoreaux-a1.git>
 
-### R Shiny application file name: app.R 
+-   **R Markdown file name: Washingtonian Top 100 Restaurant Picker.Rmd**
+
+-   **R Shiny application file name: app.R**
+
+-   **Final Dataset file name: restaurants_cleaned.xlsx**
 
 ```{r message=FALSE, warning=FALSE, include=FALSE}
 # Libraries
@@ -37,7 +41,7 @@ library(knitr)
 
 ### *Question of Interest: How can we optimize restaurant choices in the Washington area?*
 
-Our research aims to explore the Washingtonian Magazine's "Top 100 Restaurants" list, by analyzing factors including restaurant rankings, location, cuisine, and pricing. We propose to develop an interactive graphic, which will allow users to explore the data and recommend restaurants based on their preferences. Our goal is to provide a straightforward guide for both locals and tourists, making it easier for them to discover and enjoy dining experiences in the greater Washington D.C. area. Table 1 shows the first six rows of the dataset obtained from Washingtonian Web Scraping data.
+Our research aims to explore the Washingtonian Magazine's "Top 100 Restaurants" list, by analyzing factors including restaurant rankings, location, cuisine, and pricing. We propose to develop an interactive graphic, which will allow users to explore the data and recommend restaurants based on their preferences. Our goal is to provide a straightforward guide for both locals and tourists, making it easier for them to discover and enjoy dining experiences in the greater Washington D.C. area.
 
 ## Data
 
@@ -49,7 +53,7 @@ To achieve our research goal, we will utilize a dataset comprising essential inf
 
 1.  Washingtonian Web Scraping
 
-We initially acquired data by web scraping the Washingtonian Magazine website, extracting details on the top 100 ranked restaurants in the area, using R packages rvest and httr. This information involves restaurant names, ranking, genres, addresses, and phone numbers. Table 1 below shows the first six columns of dataset obtained from Washingtonian Web Scraping.
+We initially acquired data by web scraping the Washingtonian Magazine website, extracting details on the top 100 ranked restaurants in the area, using R packages 'rvest' and 'httr'. This information involves restaurant names, ranking, genres, addresses, and phone numbers. Below are the first six columns of the dataset obtained from Washingtonian Web Scraping.
 
 ```{r message=FALSE, warning=FALSE, include=FALSE}
 # see whether I can scrape
@@ -115,7 +119,7 @@ exportlist <- write.xlsx(tophundred_final, "/Users/sungjoocho/Desktop/UMD/Fall20
 
 2.  Yelp API Data
 
-Subsequently, we obtained ratings and price level information using the Yelp API with Python and libraries such as certify, chrset, and fuzzywuzzy. The associated script, titled script.py, is available in the Data folder on GitHub.
+Subsequently, we obtained ratings and price level information using the Yelp API with Python and libraries such as 'certify', 'chrset', and 'fuzzywuzzy'. The associated script, titled script.py, is available in the Yelp_Data folder on GitHub.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 # Load Data from Yelp (obtained using Python)
@@ -126,7 +130,7 @@ head(yelp)
 
 3.  Merging Washingtonian Web Scraping Data and Yelp API Data
 
-The Washingtonian web scraping data and Yelp API data were then merged in R using the left_join function from the dplyr package. During this process, discrepancies were found in restaurant names between Washingtonian and Yelp data, such as 'Pineapple and Pearls' in Washingtonian versus 'Pineapple & Pearls' in Yelp. To address this, a new variable, 'key_name', was created to standardize names by removing special characters and spaces for accurate matching using the gsub function. The table below presents the initial six rows of the merged dataframe, combining data from both the Washingtonian and Yelp datasets.
+The Washingtonian web scraping data and Yelp API data were then merged in R using the left_join function from the 'dplyr' package. During this process, discrepancies were found in restaurant names between Washingtonian and Yelp data, such as 'Pineapple and Pearls' in Washingtonian versus 'Pineapple & Pearls' in Yelp. To address this, a new variable, 'key_name', was created to standardize names by removing special characters and spaces for accurate matching using the gsub function. The table below presents the initial six rows of the merged dataframe, combining data from both the Washingtonian and Yelp datasets.
 
 ```{r include=FALSE}
 # create key_name variable for merging in tophundred_final dataset 
@@ -159,7 +163,7 @@ head(data)
 
 4.  Google Places API Data
 
-Finally, we obtained restaurant details including latitude, longitude, Google rating, Google price levels, user rating totals, and website information using the Google Places API with the R googleway package. Particularly, the **'google_places'** function was used to collect latitude, longitude, and address data. Additionally, **'google_places_details'** function was employed to get information on rating, price level, website, user rating total, and phone number.
+Finally, we obtained restaurant details including latitude, longitude, Google rating, Google price levels, user rating totals, and website information using the Google Places API with the R 'googleway' package. Particularly, the **'google_places'** function was used to collect latitude, longitude, and address data. Additionally, **'google_places_details'** function was employed to get information on rating, price level, website, user rating total, and phone number.
 
 ```{r message=FALSE, warning=FALSE, include=FALSE}
 # Google Places Data
@@ -260,12 +264,16 @@ restaurants <- read_excel("restaurants_cleaned.xlsx")
 head(restaurants)
 ```
 
+6.  Build an Interactive Map in RShiny
+
+Next, we used this dataset to create an interactive RShiny map application using the package leaflet(). Coordinates were plotted using the scraped latitude and longitude data from Google Places, and buttons were created to help users filter restaurant data. Additionally, the data was cleaned further so that we could embed a hyperlink to each restaurant's website in the name of the restaurant on each specified map marker.
+
 ### *Characteristics of the Dataset*
 
 The final dataset consists of 100 rows of individual restaurants ranked by Washingtonian Magazine. The variables include ID, top25_wm, ranking, names, genre, phone_number, price_yelp, rating_yelp, price_google, rating_google, price_avg, rating_avg, address, latitude, longitude, google_user_rating_total, and website. Table 1 presents a comprehensive description of the variables in our final dataset.
 
 | Variable Name            | Variable Description                                                                             | Value                                  |
-|----------------|----------------------------------------|----------------|
+|-------------------|------------------------------------|-------------------|
 | ID                       | Restaurant ID number                                                                             | 1-100                                  |
 | top25_wm                 | Indication of whether the restaurant belongs to the top 25 restaurants in the Washington DC area | 1 for yes; 0 otherwise                 |
 | ranking                  | Ranking within the top 25 restaurants in Washington DC                                           | 1-25, or NA if not in the top 25       |
@@ -287,11 +295,12 @@ The final dataset consists of 100 rows of individual restaurants ranked by Washi
 
 : Variable Description
 
+
 ## Analysis
 
 ### *Basic Data Analysis*
 
-The histogram of ratings indicates that the majority of top 100 restaurants in Washington DC tend to have ratings from 4 to 5. Additionally, the histogram of price level shows that the most prevalent price level among these restaurants is between 2 and 3.
+The histogram of ratings indicates that the majority of top 100 restaurants in Washington DC tend to have high ratings between 4 and 5. Additionally, the histogram of price level shows that the most prevalent price level among these restaurants is between 2 and 3.
 
 ```{r echo=FALSE}
 par(mfrow=c(2,2))
@@ -381,12 +390,14 @@ find_restaurants(top25_wm=1)
 
 ### *Interactive Graphic*
 
-We developed an interactive graphic using the R Shiny app framework with several packages including shiny, leaflet, and dplyr.
-
+We developed an interactive graphic using the R Shiny app framework with several packages including ‘shiny’, ‘leaflet’, and ‘dplyr’.
 The corresponding code can be found on GitHub in the 'app.R' file. The application can be run by clicking the 'Run App' button in the code.
+
+Our interactive graphic allows users to filter from our list to choose a single restaurant or a list of restaurants that meet their criteria. Optimizing choice will vary by users, and our function takes into consideration different priorities users may decide to input. For instance, users can filter map data to only display Washingtonian Magazine’s top 25 ranked restaurants. They can also filter map data to display restaurants with a specified minimum star rating or a maximum “dollar-sign” rating. Additionally, they can enter the type of cuisine they might be craving, such as “Mediterranean” or “Japanese,” specifying star rating and price level to filter results.
+Allowing users to explore restaurants on the map and tailor results to their desired specifications allows our users to find their own answer to what their optimal restaurant choices are in the Washington area.
 
 
 ## Conclusion
 
-To address our research question, we initiated by acquiring the Top 100 Restaurants list from Washingtonian Magazine through web scraping, obtaining basic information. Subsequently, we enriched the dataset with more detailed variables, including address, phone numbers, website, latitude, longitude, rating and price level, sourced from both Yelp API and Google Places API data. By merging and manually cleaning these three datasets, we conducted a fundamental descriptive analysis. This included presenting histograms of ratings and price levels, along with average rating and average price level information grouped by genre. This reveals that the majority of the top 100 restaurants in the area tend to have high ratings, predominantly falling between 4 and 5. Similarly, the price levels are generally lower, predominantly around 2 and 3. Finally, we developed a function that optimize restaurant choices in the Washington area based on the user-defined criteria. Using this function, we created an interactive graphic using the R Shiny application. Regarding limitations, the optimization process is entirely based on user input, requiring specific values for arguments. The current fuctionality only takes into account variables such as price level, rating, genre, and whether the restaurant is part of the top 25 ranking. As a potential improvement in future studies, incorporating additional information, such as the number of reviews, could provide a more comprehensive analysis.
-
+To address our research question, we began by scraping Washingtonian Magazine’s Top 100 Restaurants list from their website and cleaning the subsequent output. Then, we enhanced this dataset by adding more detailed variables, including address, phone numbers, website, latitude, longitude, rating and price level, all sourced from both Yelp API and Google Places API data. By merging and manually cleaning these datasets, we were able to conduct a fundamental descriptive analysis. This analysis included presenting histograms of ratings and price levels, along with average rating and average price level information grouped by genre. This reveals that the majority of the top 100 restaurants in the area tend to have high ratings, predominantly falling between 4 and 5. Interestingly though, the price levels are generally moderate, predominantly around 2 and 3. Finally, we developed a function that optimize restaurant choices in the Washington area based on the user-defined criteria. Using this function, we created an interactive graphic using the R Shiny application. 
+Regarding limitations, the optimization process is entirely based on user input, requiring specific values for arguments. The current functionality only accounts for variables such as price level, rating, genre, and whether the restaurant is part of Washingtonian Magazine’s Top 25 ranking. Moreover, this is the first version of this application, which while we scraped data and used APIs to gather up to date information, the data used for our map is only accurate to early December. It’s possible star rating averages and price information from Yelp and Google have already changed. Moreover, when we presented a very early version of this application to our classmates, they had many ideas for potential new features. In potential future versions of this application, we’d like to incorporate some of this additional information, such as the number of reviews or if the restaurant is friendly to those with dietary restrictions. These additional variables could provide a more comprehensive analysis.
