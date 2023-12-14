@@ -11,10 +11,11 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+### GitHub Repository: <https://github.com/katelmrx/cho-lamoreaux-a1.git>
+
+### R Shiny app:
 
 ## Libraries
-
-#Feedback from Brian: How do we optimize restaurant choices? Building an interactive tool. Make sure you have a clear goal in mind. RQ = can be goal we have in mind.
 
 Ideas: could link `$$$$` ratings/star ratings/mapdata/website from google, star ratings from yelp (use yelp api; scraping is illegal).
 
@@ -33,7 +34,6 @@ library(openxlsx)
 library(readxl)
 library(knitr)
 ```
-
 
 ## 1. Washingtonian Web Scraping
 
@@ -78,7 +78,6 @@ tophundred$value <- gsub("[\n]+", "sepcol", tophundred$value)
 tophundred$value[1]
 ```
 
-
 ```{r}
 # Remove "sepcolRead Our ReviewsepcolVisit Website sepcol"
 tophundred$value <- gsub("sepcolRead Our ReviewsepcolVisit Website sepcol", "", tophundred$value)
@@ -91,7 +90,6 @@ tophundred_clean <- tophundred %>%
   separate(value,c("blank","ranking","name", "ranking2", "name2", "genre", "address", "phone number"), 'sepcol') 
 head(tophundred_clean)
 ```
-
 
 ```{r}
 tophundred_final <- tophundred_clean %>%
@@ -106,16 +104,15 @@ head(tophundred_final)
 # exportlist <- write.xlsx(tophundred_final, "/Users/sungjoocho/Desktop/UMD/Fall2023/SURV727/Group_assignment/cho-lamoreaux-a1/wasingtonian_top100.xlsx")
 ```
 
-
 ## 2. Yelp API Data
+
 ```{r}
 # Load Data from Yelp (obtained using Python)
 yelp <- read.csv("yelp.csv")
 yelp <- as.tibble(yelp)
 ```
 
-
-## 3. Merging Washingtonion Web Scraping Data and Yelp API Data
+## 3. Merging Washingtonian Web Scraping Data and Yelp API Data
 
 We found discrepancies in restaurant names between Washingtonian and Yelp data, such as 'Pineapple and Pearls' in Washingtonian versus 'Pineapple & Pearls' in Yelp. To address this, we created a new variable called 'key_name' for merging these datasets. This variable eliminates all special characters and spaces to ensure accurate matching.
 
@@ -131,7 +128,7 @@ head(yelp)
 ```
 
 ```{r}
-# merge yelp data to washingtonion
+# merge yelp data to washingtonian
 washington_yelp <- tophundred_final %>% left_join(yelp, by = "key_name")
 head(washington_yelp)
 ```
@@ -150,8 +147,8 @@ data <- read_excel("washington_yelp_cleaned.xlsx")
 head(data)
 ```
 
-
 ## 3. Google Places API Data
+
 ```{r}
 library(googleway)
 api_key <- readLines("api_key.tex")
@@ -227,8 +224,7 @@ for(i in 1:nrow(data)) {
 head(google_places)
 ```
 
-
-## 4. Merge Google API data to Washingtonion & Yelp combined dataset
+## 4. Merge Google API data to Washingtonian & Yelp combined dataset
 
 ```{r}
 # merge dataset
@@ -239,11 +235,12 @@ head(restaurants)
 # write.xlsx(restaurants, "/Users/sungjoocho/Desktop/UMD/Fall2023/SURV727/Group_assignment/cho-lamoreaux-a1/FinalProject/restaurants.xlsx")
 
 # load manually cleaned data (added ID, top25_wm, rating_avg, price_avg)
-# restaurants <- read_excel("restaurants_cleaned.xlsx")
+restaurants <- read_excel("restaurants_cleaned.xlsx")
 head(restaurants)
 ```
 
 ## 5. Basic Data Analysis
+
 ```{r}
 par(mfrow=c(2,2))
 
@@ -277,8 +274,8 @@ rest_group <- restaurants %>%
 kable(rest_group, caption = "Rating and Price by Genre")
 ```
 
-
 ## 6. Writing a Function
+
 ```{r}
 find_restaurants <- function(genre = NULL, rating = NULL, price_level = NULL, top25_wm = NULL) {
   
@@ -305,17 +302,15 @@ find_restaurants <- function(genre = NULL, rating = NULL, price_level = NULL, to
     result <- result[result$top25_wm == top25_wm, ]
   }
   
-  result <- result %>% filter(!is.na(name))
+  #result <- result %>% filter(!is.na(name))
   return(result)
 }
 
 # example usage:
-filtered_restaurants <- find_restaurants(genre="Italian", rating=3, price_level=4, top25_wm=1)
+filtered_restaurants <- find_restaurants(genre="Japanese", rating=4, price_level=3, top25_wm=0)
 filtered_restaurants 
 ```
 
-
 ## 7. Interactive Graphic
 
-
-
+We developed an interactive graphic using the R Shiny app framework, and the code is contained in the 'app.R' file.
