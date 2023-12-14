@@ -1,0 +1,403 @@
+---
+title: "Washingtonian Top 100 Restaurant Picker"
+author: "Sungjoo Cho and Kate Lamoreaux"
+date: "2023-12-13"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### GitHub Repository: <https://github.com/katelmrx/cho-lamoreaux-a1.git>
+
+-   **R Markdown file name: Washingtonian Top 100 Restaurant Picker.Rmd**
+
+-   **R Shiny application file name: app.R**
+
+-   **Final Dataset file name: restaurants_cleaned.xlsx**
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+# Libraries
+library(stringr)
+library(xml2)
+library(rvest)
+library(tidyverse)
+library(tidytext)
+library(jsonlite)
+library(robotstxt)
+library(RSocrata)
+library(googleway)
+library(httr)
+library(readxl)
+library(openxlsx)
+library(readxl)
+library(knitr)
+```
+
+## Introduction
+
+### *Question of Interest: How can we optimize restaurant choices in the Washington area?*
+
+Our research aims to explore the Washingtonian Magazine's "Top 100 Restaurants" list, by analyzing factors including restaurant rankings, location, cuisine, and pricing. We propose to develop an interactive graphic, which will allow users to explore the data and recommend restaurants based on their preferences. Our goal is to provide a straightforward guide for both locals and tourists, making it easier for them to discover and enjoy dining experiences in the greater Washington D.C. area.
+
+## Data
+
+### *Dataset*
+
+To achieve our research goal, we will utilize a dataset comprising essential information about restaurants. This dataset includes details such as restaurant names, rankings, genres, phone numbers, pricing, ratings, websites, locations, as well as latitude and longitude. To compile this comprehensive dataset, we plan to obtain information from three multiple sources: Washingtonian, Yelp, and Google Places.
+
+### *Methodology*
+
+1.  Washingtonian Web Scraping
+
+We initially acquired data by web scraping the Washingtonian Magazine website, extracting details on the top 100 ranked restaurants in the area, using R packages 'rvest' and 'httr'. This information involves restaurant names, ranking, genres, addresses, and phone numbers. Below are the first six columns of the dataset obtained from Washingtonian Web Scraping.
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+# see whether I can scrape
+paths_allowed("https://www.washingtonian.com/2023/01/25/the-100-very-best-restaurants-in-washington-dc/")
+```
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+# Reading in the html page as R object url
+url <- read_html("https://www.washingtonian.com/2023/01/25/the-100-very-best-restaurants-in-washington-dc/")
+```
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+# Extracting the nodes from object url (using the `rvest` package) 
+nds <- html_elements(url, xpath = '//*[contains(concat( " ", @class, " " ), concat( " ", "sm-tw-py-0", " " ))]')
+
+str(nds)
+```
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+names <- html_text(nds)
+head(names)
+```
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+#convert to a tibble
+tophundred <- as_tibble(names)
+head(tophundred)
+```
+
+```{r include=FALSE}
+tophundred$value[1]
+```
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+# Remove "\n"
+tophundred$value <- gsub("[\n]+", "sepcol", tophundred$value)
+tophundred$value[1]
+```
+
+```{r include=FALSE}
+# Remove "sepcolRead Our ReviewsepcolVisit Website sepcol"
+tophundred$value <- gsub("sepcolRead Our ReviewsepcolVisit Website sepcol", "", tophundred$value)
+head(tophundred)
+```
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+#Using separate to clean and label columns
+tophundred_clean <- tophundred %>%
+  separate(value,c("blank","ranking","name", "ranking2", "name2", "genre", "address", "phone number"), 'sepcol') 
+head(tophundred_clean)
+```
+
+```{r echo=FALSE}
+tophundred_final <- tophundred_clean %>%
+  select(-c("blank", "ranking2", "name2"))
+head(tophundred_final)
+```
+
+```{r eval=FALSE, include=FALSE}
+# exporting the data for manually cleaning
+exportlist <- write.xlsx(tophundred_final, "/Users/sungjoocho/Desktop/UMD/Fall2023/SURV727/Group_assignment/cho-lamoreaux-a1/wasingtonian_top100.xlsx")
+```
+
+2.  Yelp API Data
+
+Subsequently, we obtained ratings and price level information using the Yelp API with Python and libraries such as 'certify', 'chrset', and 'fuzzywuzzy'. The associated script, titled script.py, is available in the Yelp_Data folder on GitHub.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Load Data from Yelp (obtained using Python)
+yelp <- read.csv("yelp.csv")
+yelp <- as.tibble(yelp)
+head(yelp)
+```
+
+3.  Merging Washingtonian Web Scraping Data and Yelp API Data
+
+The Washingtonian web scraping data and Yelp API data were then merged in R using the left_join function from the 'dplyr' package. During this process, discrepancies were found in restaurant names between Washingtonian and Yelp data, such as 'Pineapple and Pearls' in Washingtonian versus 'Pineapple & Pearls' in Yelp. To address this, a new variable, 'key_name', was created to standardize names by removing special characters and spaces for accurate matching using the gsub function. The table below presents the initial six rows of the merged dataframe, combining data from both the Washingtonian and Yelp datasets.
+
+```{r include=FALSE}
+# create key_name variable for merging in tophundred_final dataset 
+tophundred_final$key_name <- gsub("[^A-Za-z0-9]", "", tophundred_final$name)
+head(tophundred_final)
+
+# creating key_name variable for merging in yelp dataset
+yelp$key_name <- gsub("&", "and", yelp$name) # change & to "and"
+yelp$key_name <- gsub("[^A-Za-z0-9]", "", yelp$key_name)
+head(yelp)
+
+# merge yelp data to washingtonian
+washington_yelp <- tophundred_final %>% left_join(yelp, by = "key_name")
+head(washington_yelp)
+
+# remove key_name variables
+washington_yelp <- washington_yelp[, c("ranking", "name.x", "genre", "categories", "address.x", "address.y", "phone number", "phone", "rating", "price", "latitude", "longitude")]
+```
+
+```{r eval=FALSE, include=FALSE}
+# export data for manual cleaning
+write.xlsx(washington_yelp, "/Users/sungjoocho/Desktop/UMD/Fall2023/SURV727/Group_assignment/cho-lamoreaux-a1/FinalProject/washington_yelp.xlsx")
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# load manually cleaned data
+data <- read_excel("washington_yelp_cleaned.xlsx")
+head(data)
+```
+
+4.  Google Places API Data
+
+Finally, we obtained restaurant details including latitude, longitude, Google rating, Google price levels, user rating totals, and website information using the Google Places API with the R 'googleway' package. Particularly, the **'google_places'** function was used to collect latitude, longitude, and address data. Additionally, **'google_places_details'** function was employed to get information on rating, price level, website, user rating total, and phone number.
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+# Google Places Data
+api_key <- readLines("api_key.tex")
+google_places <- tibble(name = character(),
+                        address = character(),
+                        latitude = numeric(),
+                        longitude = numeric(),
+                        rating = numeric(),
+                        price_level = numeric(),
+                        phone_number = character(),
+                        website = character(),
+                        user_rating_total = numeric()
+                        )
+
+for(i in 1:nrow(data)) {
+  current_row <- data[i,]
+  current_row_name_sub <- gsub("&|and", "", current_row$name)
+  places_data <- google_places(search_string = paste(current_row_name_sub, current_row$address, sep=" "),
+                               key = api_key)
+  result <- places_data["results"]
+  if (length(result) == 0) {
+    current_data <- tibble(name = current_row$name,
+                           address = "",
+                           latitude = 0,
+                           longitude = 0,
+                           rating = 0,
+                           price_level = 0,
+                           phone_number = "",
+                           website = "",
+                           user_rating_total = 0)
+  } 
+  else {
+    first_result <- result[1]
+    place_id_result <- first_result$results$place_id
+    if (length(gregexpr('"[^"]+"', first_result$results$place_id)[1]) > 1) {
+      # Extract content within the first pair of double quotes
+      place_id_result <- sub('^"([^"]+)".*', '\\1', first_result$results$place_id)
+    } else {
+      # If there's only one pair or none, keep the original string
+      place_id_result <- first_result$results$place_id
+    }
+    
+    place_id_result <- substr(first_result$results$place_id[1], 1, 27)
+    latitude <- first_result$results$geometry$location$lat
+    longitude <- first_result$results$geometry$location$lng
+    place_id <- first_result$results$place_id
+    place_id_result <- substr(first_result$results$place_id[1], 1, 27)
+
+    address <- first_result$results$formatted_address
+    
+    google_places_details <- google_place_details(place_id = place_id_result,
+                                          key = api_key)
+    price_level <- google_places_details$result$price_level
+    rating <- google_places_details$result$rating
+    website <- google_places_details$result$website
+    user_rating_total <- google_places_details$result$user_ratings_total
+    phone <- google_places_details$result$formatted_phone_number
+    current_data <- tibble(name = current_row$name,
+                           address = address,
+                           latitude = latitude,
+                           longitude = longitude,
+                           rating = rating,
+                           price_level = price_level,
+                           phone_number = phone,
+                           website = website,
+                           user_rating_total = user_rating_total)
+  }
+  google_places <- add_row(google_places, current_data)
+  google_places <- google_places %>% distinct(name, .keep_all = TRUE)
+
+}
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# the first six rows of Google Places Data
+head(google_places)
+```
+
+5.  Merge Google API data to Washingtonian & Yelp combined dataset
+
+This dataset was merged with the combined dataset from Washingtonian and Yelp, by using the left_join function based on the name of the restaurant. Then we created new variables, rating_avg and price_avg, which indicate the average rating and price level derived from both Yelp and Google Places data. Moreover, we identified missing data in the phone numbers and website information. Thus, we manually imputed the missing information by conducting lookups when applicable. This integrated dataset was used for our analysis, where we aim to unveil key factors contributing to the popularity of these restaurants and to develop an interactive graphic. With this dataset, we developed a function designed to take user inputs regarding cuisine preferences, budget considerations, and ratings. This function filters and presents restaurant options from the dataset that align with the specified criteria.
+
+```{r include=FALSE}
+# merge dataset
+restaurants <- data %>% left_join(google_places, by = "name")
+head(restaurants)
+```
+
+```{r eval=FALSE, include=FALSE}
+# export dataset for manual cleaning
+write.xlsx(restaurants, "/Users/sungjoocho/Desktop/UMD/Fall2023/SURV727/Group_assignment/cho-lamoreaux-a1/FinalProject/restaurants.xlsx")
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# load manually cleaned data (added ID, top25_wm, rating_avg, price_avg)
+restaurants <- read_excel("restaurants_cleaned.xlsx")
+head(restaurants)
+```
+
+6.  Build an Interactive Map in RShiny
+
+Next, we used this dataset to create an interactive RShiny map application using the package leaflet(). Coordinates were plotted using the scraped latitude and longitude data from Google Places, and buttons were created to help users filter restaurant data. Additionally, the data was cleaned further so that we could embed a hyperlink to each restaurant's website in the name of the restaurant on each specified map marker.
+
+### *Characteristics of the Dataset*
+
+The final dataset consists of 100 rows of individual restaurants ranked by Washingtonian Magazine. The variables include ID, top25_wm, ranking, names, genre, phone_number, price_yelp, rating_yelp, price_google, rating_google, price_avg, rating_avg, address, latitude, longitude, google_user_rating_total, and website. Table 1 presents a comprehensive description of the variables in our final dataset.
+
+| Variable Name            | Variable Description                                                                             | Value                                  |
+|-------------------|------------------------------------|-------------------|
+| ID                       | Restaurant ID number                                                                             | 1-100                                  |
+| top25_wm                 | Indication of whether the restaurant belongs to the top 25 restaurants in the Washington DC area | 1 for yes; 0 otherwise                 |
+| ranking                  | Ranking within the top 25 restaurants in Washington DC                                           | 1-25, or NA if not in the top 25       |
+| names                    | The name of the restaurants                                                                      | chr                                    |
+| genre                    | The type of the restaurants                                                                      | chr                                    |
+| phone_number             | Contact numbers for restaurants                                                                  | chr                                    |
+| price_yelp               | Price level on Yelp                                                                              | `$-$$$$`                               |
+| price_yelp_cleaned       | Numeric price level on Yelp                                                                      | 1(less expensive) -- 4(more expensive) |
+| rating_yelp              | The rating on Yelp                                                                               | 1(poor) -- 5(good)                     |
+| price_google             | Price level on Google                                                                            | 1(less expensive) -- 4(more expensive) |
+| rating_google            | The rating on Google                                                                             | 1(poor) -- 5(good)                     |
+| price_avg                | The average price level across Yelp and Google                                                   | 1(less expensive) -- 4(more expensive) |
+| rating_avg               | The average rating across Yelp and Google                                                        | 1(poor) -- 5(good)                     |
+| address                  | Location details of the restaurant                                                               | chr                                    |
+| latitude                 | Latitude of the restaurant's address                                                             | num                                    |
+| longitude                | Longitude of the restaurant's address                                                            | num                                    |
+| website                  | The website link of the restaurant                                                               | chr                                    |
+| google_user_rating_total | The number of reviews for the restaurant on Google                                               | num                                    |
+
+: Variable Description
+
+
+## Analysis
+
+### *Basic Data Analysis*
+
+The histogram of ratings indicates that the majority of top 100 restaurants in Washington DC tend to have high ratings between 4 and 5. Additionally, the histogram of price level shows that the most prevalent price level among these restaurants is between 2 and 3.
+
+```{r echo=FALSE}
+par(mfrow=c(2,2))
+
+# histogram of rating
+cleaned_data_rating <- restaurants[!is.na(restaurants$rating_avg), ]
+hist(cleaned_data_rating$rating_avg, 
+     main="Histogram of Ratings", 
+     xlab="Yelp and Google Average Rating", 
+     col="lightblue")
+
+# histogram of price
+cleaned_data_price <- restaurants[!is.na(restaurants$price_avg), ]
+hist(cleaned_data_price$price_avg, 
+     main="Histogram of Price Level", 
+     xlab="Yelp and Google Average Price Level",
+     breaks = c(0.5, 1.5, 2.5, 3.5, 4.5),
+     xlim = c(0, 5),
+     col="lightblue")
+```
+
+The table below shows that the Halal restaurant has the highest rating of 4.7 among the top 100 restaurants in the area, accompanied by a price level of 1. Fine dining follows closely with a mean rating of 4.667 and an average price of 4. The American restaurant category comprises the largest share in the top 100 restaurants in Washington DC, featuring 14 restaurants, followed by Italian with 13 and Japanese with 10 restaurants.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# rating and price level grouped by genre
+rest_group <- restaurants %>%
+  group_by(genre) %>%
+  summarise(
+    mean_rating = round(mean(rating_avg, na.rm = TRUE), 3),
+    mean_price = round(mean(price_avg, na.rm = TRUE), 3),
+    genre_count = n()  # Add this line to count the occurrences of each genre
+  ) %>%
+  na.omit() %>%
+  arrange(desc(mean_rating))
+
+kable(rest_group, caption = "Rating and Price by Genre")
+```
+
+### *Function to optimize restaurant choices*
+
+We developed a function to optimize restaurant choices according to user input. The **'find_restaurants'** function takes four arguments - genre, rating, price_level, and top24_wm. The function then effectively filters and returns restaurant options from the dataset that align with the user-defined criteria. The following is an example of how the function can be used.
+
+```{r message=FALSE, warning=FALSE}
+find_restaurants <- function(genre = NULL, rating = NULL, price_level = NULL, 
+                             top25_wm = NULL) {
+  
+  # use a copy of the original dataset
+  result <- restaurants
+  
+  # filter based on genre
+  if (!is.null(genre)) {
+    result <- result[result$genre == genre, ]
+  }
+  
+  # filter based on rating
+  if (!is.null(rating)) {
+    result <- result[result$rating_avg >= rating, ]
+  }
+  
+  # filter based on price_level
+  if (!is.null(price_level)) {
+    result <- result[result$price_avg == price_level, ]
+  }
+  
+  # filter based on top25_wm
+  if (!is.null(top25_wm)) {
+    result <- result[result$top25_wm == top25_wm, ]
+  }
+  
+  result <- result %>% filter(!is.na(name))
+  return(result)
+}
+```
+
+```{r message=FALSE, warning=FALSE}
+# example usage:
+find_restaurants(genre="Japanese", rating=4, price_level=3, top25_wm=0)
+
+find_restaurants(genre="Korean", rating=4, top25_wm=1)
+
+find_restaurants(genre="Italian", top25_wm=1)
+
+find_restaurants(genre="Mexican")
+
+find_restaurants(top25_wm=1)
+```
+
+### *Interactive Graphic*
+
+We developed an interactive graphic using the R Shiny app framework with several packages including ‘shiny’, ‘leaflet’, and ‘dplyr’.
+The corresponding code can be found on GitHub in the 'app.R' file. The application can be run by clicking the 'Run App' button in the code.
+
+Our interactive graphic allows users to filter from our list to choose a single restaurant or a list of restaurants that meet their criteria. Optimizing choice will vary by users, and our function takes into consideration different priorities users may decide to input. For instance, users can filter map data to only display Washingtonian Magazine’s top 25 ranked restaurants. They can also filter map data to display restaurants with a specified minimum star rating or a maximum “dollar-sign” rating. Additionally, they can enter the type of cuisine they might be craving, such as “Mediterranean” or “Japanese,” specifying star rating and price level to filter results.
+Allowing users to explore restaurants on the map and tailor results to their desired specifications allows our users to find their own answer to what their optimal restaurant choices are in the Washington area.
+
+
+## Conclusion
+
+To address our research question, we began by scraping Washingtonian Magazine’s Top 100 Restaurants list from their website and cleaning the subsequent output. Then, we enhanced this dataset by adding more detailed variables, including address, phone numbers, website, latitude, longitude, rating and price level, all sourced from both Yelp API and Google Places API data. By merging and manually cleaning these datasets, we were able to conduct a fundamental descriptive analysis. This analysis included presenting histograms of ratings and price levels, along with average rating and average price level information grouped by genre. This reveals that the majority of the top 100 restaurants in the area tend to have high ratings, predominantly falling between 4 and 5. Interestingly though, the price levels are generally moderate, predominantly around 2 and 3. Finally, we developed a function that optimize restaurant choices in the Washington area based on the user-defined criteria. Using this function, we created an interactive graphic using the R Shiny application. 
+Regarding limitations, the optimization process is entirely based on user input, requiring specific values for arguments. The current functionality only accounts for variables such as price level, rating, genre, and whether the restaurant is part of Washingtonian Magazine’s Top 25 ranking. Moreover, this is the first version of this application, which while we scraped data and used APIs to gather up to date information, the data used for our map is only accurate to early December. It’s possible star rating averages and price information from Yelp and Google have already changed. Moreover, when we presented a very early version of this application to our classmates, they had many ideas for potential new features. In potential future versions of this application, we’d like to incorporate some of this additional information, such as the number of reviews or if the restaurant is friendly to those with dietary restrictions. These additional variables could provide a more comprehensive analysis.
