@@ -15,7 +15,7 @@ library(readxl)
 
 library(dplyr)
 
-restaurants <- read_excel("/cloud/project/FinalProject/restaurants_cleaned.xlsx")
+restaurants <- read_excel("restaurants_cleaned.xlsx")
 
 restaurants$hyperlink <- paste("href='",restaurants$website,"'>")
 
