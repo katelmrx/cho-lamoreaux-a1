@@ -135,7 +135,7 @@ server <- function(input, output, session) {
     top25 <- restaurants[restaurants$top25_wm == 1, ]
     leafletProxy("testmap") %>%
       clearMarkers() %>%
-      addAwesomeMarkers(data = top25, lng = ~longitude, lat = ~latitude, icon=icons, popup = restaurants$labelcontent, label = ~as.character(name))
+      addAwesomeMarkers(data = top25, lng = ~longitude, lat = ~latitude, icon=icons, popup = top25$labelcontent, label = ~as.character(name))
   })
   
   # Filter button event
@@ -144,7 +144,7 @@ server <- function(input, output, session) {
     filteredData1<- (restaurants[restaurants$price_avg<= maxPrice, ])
     leafletProxy("testmap") %>%
       clearMarkers() %>%
-      addAwesomeMarkers(data = filteredData1, lng = ~longitude, lat = ~latitude, icon=icons, popup = restaurants$labelcontent, label = ~as.character(name)) 
+      addAwesomeMarkers(data = filteredData1, lng = ~longitude, lat = ~latitude, icon=icons, popup = filteredData1$labelcontent, label = ~as.character(name)) 
   })
   
   # Filter button event
@@ -153,7 +153,7 @@ server <- function(input, output, session) {
     filteredData2<- (restaurants[restaurants$rating_avg >= minStarRating, ])
     leafletProxy("testmap") %>%
       clearMarkers() %>%
-      addAwesomeMarkers(data = filteredData2, lng = ~longitude, lat = ~latitude, icon=icons, popup = restaurants$labelcontent, label = ~as.character(name)) 
+      addAwesomeMarkers(data = filteredData2, lng = ~longitude, lat = ~latitude, icon=icons, popup = filteredData2$labelcontent, label = ~as.character(name)) 
   })
   
   
