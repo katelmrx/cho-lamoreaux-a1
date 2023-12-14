@@ -13,7 +13,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ### GitHub Repository: <https://github.com/katelmrx/cho-lamoreaux-a1.git>
 
-### R Shiny app: DCRestaurantPicker folder - app.R file
+### R Shiny application file name: app.R 
 
 ```{r message=FALSE, warning=FALSE, include=FALSE}
 # Libraries
@@ -262,7 +262,7 @@ head(restaurants)
 
 ### *Characteristics of the Dataset*
 
-The final dataset consists of 100 rows of individual restaurants ranked by Washingtonian Magazine. The variables include ID, top25_wm, ranking, names, genre, phone_number, price_yelp, rating_yelp, price_google, rating_google, price_avg, rating_avg, address, latitude, longitude, google_user_rating_total, and website.
+The final dataset consists of 100 rows of individual restaurants ranked by Washingtonian Magazine. The variables include ID, top25_wm, ranking, names, genre, phone_number, price_yelp, rating_yelp, price_google, rating_google, price_avg, rating_avg, address, latitude, longitude, google_user_rating_total, and website. Table 1 presents a comprehensive description of the variables in our final dataset.
 
 | Variable Name            | Variable Description                                                                             | Value                                  |
 |----------------|----------------------------------------|----------------|
@@ -291,7 +291,7 @@ The final dataset consists of 100 rows of individual restaurants ranked by Washi
 
 ### *Basic Data Analysis*
 
-The histogram of ratings indicates that the majority of top 100 restaurants in Washington DC tend to have ratings from 4.4 to 4.6. Additionally, the histogram of price level shows that the most prevalent price level among these restaurants is between 2 and 3.
+The histogram of ratings indicates that the majority of top 100 restaurants in Washington DC tend to have ratings from 4 to 5. Additionally, the histogram of price level shows that the most prevalent price level among these restaurants is between 2 and 3.
 
 ```{r echo=FALSE}
 par(mfrow=c(2,2))
@@ -381,9 +381,12 @@ find_restaurants(top25_wm=1)
 
 ### *Interactive Graphic*
 
-We developed an interactive graphic using the R Shiny app framework,  and the corresponding code can be found on GitHub in the 'app.R' file.
+We developed an interactive graphic using the R Shiny app framework with several packages including shiny, leaflet, and dplyr.
+
+The corresponding code can be found on GitHub in the 'app.R' file. The application can be run by clicking the 'Run App' button in the code.
+
 
 ## Conclusion
 
-Based on the analysis above, 
+To address our research question, we initiated by acquiring the Top 100 Restaurants list from Washingtonian Magazine through web scraping, obtaining basic information. Subsequently, we enriched the dataset with more detailed variables, including address, phone numbers, website, latitude, longitude, rating and price level, sourced from both Yelp API and Google Places API data. By merging and manually cleaning these three datasets, we conducted a fundamental descriptive analysis. This included presenting histograms of ratings and price levels, along with average rating and average price level information grouped by genre. This reveals that the majority of the top 100 restaurants in the area tend to have high ratings, predominantly falling between 4 and 5. Similarly, the price levels are generally lower, predominantly around 2 and 3. Finally, we developed a function that optimize restaurant choices in the Washington area based on the user-defined criteria. Using this function, we created an interactive graphic using the R Shiny application. Regarding limitations, the optimization process is entirely based on user input, requiring specific values for arguments. The current fuctionality only takes into account variables such as price level, rating, genre, and whether the restaurant is part of the top 25 ranking. As a potential improvement in future studies, incorporating additional information, such as the number of reviews, could provide a more comprehensive analysis.
 
